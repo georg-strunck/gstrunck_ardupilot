@@ -59,6 +59,7 @@ MAV_MODE GCS_MAVLINK_Plane::base_mode() const
     case Mode::Number::GUIDED:
     case Mode::Number::CIRCLE:
     case Mode::Number::TAKEOFF:
+    case Mode::Number::AUTOLAND_G_SPOTS:
 #if HAL_QUADPLANE_ENABLED
     case Mode::Number::QRTL:
     case Mode::Number::LOITER_ALT_QLAND:

@@ -37,6 +37,9 @@ Mode *Plane::mode_from_mode_num(const enum Mode::Number num)
     case Mode::Number::AUTO:
         ret = &mode_auto;
         break;
+    case Mode::Number::AUTOLAND_G_SPOTS:
+        ret = &mode_autolandgspots;
+        break;
     case Mode::Number::RTL:
         ret = &mode_rtl;
         break;

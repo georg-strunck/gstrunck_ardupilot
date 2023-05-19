@@ -160,6 +160,7 @@ public:
     friend class ModeTakeoff;
     friend class ModeThermal;
     friend class ModeLoiterAltQLand;
+    friend class ModeAUTOLAND_G_SPOTS;
 
     Plane(void);
 
@@ -261,6 +262,7 @@ private:
     ModeAuto mode_auto;
     ModeRTL mode_rtl;
     ModeLoiter mode_loiter;
+    ModeAUTOLAND_G_SPOTS mode_autolandgspots;
 #if HAL_ADSB_ENABLED
     ModeAvoidADSB mode_avoidADSB;
 #endif
