@@ -43,7 +43,7 @@ void ModeThermal::update_soaring()
     // Check distance to home against MAX_RADIUS.
     if (plane.g2.soaring_controller.max_radius >= 0 &&
         sq(position.x)+sq(position.y) > sq(plane.g2.soaring_controller.max_radius) &&
-        plane.previous_mode->mode_number()!=Mode::Number::AUTO) {
+        ((plane.previous_mode->mode_number()!=Mode::Number::AUTO) || (plane.previous_mode->mode_number()!=Mode::Number::AUTOLAND_G_SPOTS))) {
         // Some other loiter status, and outside of maximum soaring radius, and previous mode wasn't AUTO
         gcs().send_text(MAV_SEVERITY_INFO, "Soaring: Outside SOAR_MAX_RADIUS, RTL");
         plane.set_mode(plane.mode_rtl, ModeReason::SOARING_DRIFT_EXCEEDED);
@@ -55,7 +55,7 @@ void ModeThermal::update_soaring()
     // position only, without taking account of the desired direction of travel.
     Vector2f prev_wp, next_wp;
 
-    if (plane.previous_mode == &plane.mode_auto) {
+    if ((plane.previous_mode == &plane.mode_auto) || (plane.previous_mode == &plane.mode_autolandgspots)) {
         AP_Mission::Mission_Command current_nav_cmd = plane.mission.get_current_nav_cmd();
         AP_Mission::Mission_Command prev_nav_cmd;
 
@@ -126,6 +126,11 @@ bool ModeThermal::exit_heading_aligned() const
     // If home is not set, or heading not locked, return true to avoid delaying mode change.
     switch (plane.previous_mode->mode_number()) {
     case Mode::Number::AUTO: {
+        //Get the lat/lon of next Nav waypoint after this one:
+        AP_Mission::Mission_Command current_nav_cmd = plane.mission.get_current_nav_cmd();
+        return plane.mode_loiter.isHeadingLinedUp(plane.next_WP_loc, current_nav_cmd.content.location);
+    }
+    case Mode::Number::AUTOLAND_G_SPOTS: {
         //Get the lat/lon of next Nav waypoint after this one:
         AP_Mission::Mission_Command current_nav_cmd = plane.mission.get_current_nav_cmd();
         return plane.mode_loiter.isHeadingLinedUp(plane.next_WP_loc, current_nav_cmd.content.location);

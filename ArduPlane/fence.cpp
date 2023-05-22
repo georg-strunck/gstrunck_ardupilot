@@ -61,7 +61,7 @@ void Plane::fence_check()
         case AC_FENCE_ACTION_GUIDED_THROTTLE_PASS:
         case AC_FENCE_ACTION_RTL_AND_LAND:
             if (fence_act == AC_FENCE_ACTION_RTL_AND_LAND) {
-                if (control_mode == &mode_auto &&
+                if (((control_mode == &mode_auto) || (control_mode == &mode_autolandgspots)) &&
                     mission.get_in_landing_sequence_flag() &&
                     (g.rtl_autoland == RtlAutoland::RTL_THEN_DO_LAND_START ||
                      g.rtl_autoland == RtlAutoland::RTL_IMMEDIATE_DO_LAND_START)) {

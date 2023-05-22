@@ -574,7 +574,7 @@ void Plane::update_flight_stage(void)
 {
     // Update the speed & height controller states
     if (control_mode->does_auto_throttle() && !throttle_suppressed) {
-        if ((control_mode == &mode_auto) || (control_mode == &mode_auto)) {
+        if ((control_mode == &mode_auto) || (control_mode == &mode_autolandgspots)) {
 #if HAL_QUADPLANE_ENABLED
             if (quadplane.in_vtol_auto()) {
                 set_flight_stage(AP_Vehicle::FixedWing::FLIGHT_VTOL);

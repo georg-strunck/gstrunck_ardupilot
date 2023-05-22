@@ -2020,7 +2020,7 @@ bool QuadPlane::handle_do_vtol_transition(enum MAV_VTOL_STATE state) const
         gcs().send_text(MAV_SEVERITY_NOTICE, "VTOL not available");
         return false;
     }
-    if (plane.control_mode != &plane.mode_auto) {
+    if ((plane.control_mode != &plane.mode_auto) || (plane.control_mode != &plane.mode_autolandgspots)) {
         gcs().send_text(MAV_SEVERITY_NOTICE, "VTOL transition only in AUTO");
         return false;
     }
@@ -2056,7 +2056,7 @@ bool QuadPlane::in_vtol_auto(void) const
     if (!available()) {
         return false;
     }
-    if (plane.control_mode != &plane.mode_auto) {
+    if ((plane.control_mode != &plane.mode_auto) || (plane.control_mode != &plane.mode_autolandgspots)) {
         return false;
     }
     if (plane.auto_state.vtol_mode) {
@@ -2750,7 +2750,7 @@ void QuadPlane::vtol_position_controller(void)
         FALLTHROUGH;
     case QPOS_POSITION2: {
         bool vtol_loiter_auto = false;
-        if (plane.control_mode == &plane.mode_auto) {
+        if ((plane.control_mode == &plane.mode_auto) || (plane.control_mode == &plane.mode_autolandgspots)) {
             switch (plane.mission.get_current_nav_cmd().id) {
             case MAV_CMD_NAV_LOITER_UNLIM:
             case MAV_CMD_NAV_LOITER_TIME:
@@ -3199,7 +3199,7 @@ bool QuadPlane::verify_vtol_takeoff(const AP_Mission::Mission_Command &cmd)
     plane.fence.auto_enable_fence_after_takeoff();
 #endif
 
-    if (plane.control_mode == &plane.mode_auto) {
+    if ((plane.control_mode == &plane.mode_auto) || (plane.control_mode == &plane.mode_autolandgspots)) {
         // we reset TECS so that the target height filter is not
         // constrained by the climb and sink rates from the initial
         // takeoff height.
@@ -3336,7 +3336,7 @@ bool QuadPlane::verify_vtol_land(void)
 #endif
             last_land_final_agl = plane.relative_ground_altitude(plane.g.rangefinder_landing);
             gcs().send_text(MAV_SEVERITY_INFO,"Land descend started");
-            if ((plane.control_mode == &plane.mode_auto) || (plane.control_mode == &plane.mode_auto)) {
+            if ((plane.control_mode == &plane.mode_auto) || (plane.control_mode == &plane.mode_autolandgspots)) {
                 // set height to mission height, so we can use the mission
                 // WP height for triggering land final if no rangefinder
                 // available

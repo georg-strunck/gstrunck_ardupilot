@@ -133,6 +133,18 @@ void Plane::setup_glide_slope(void)
             reset_offset_altitude();
         }
         break;
+    case Mode::Number::AUTOLAND_G_SPOTS:
+        // we only do glide slide handling in AUTO when above 20m or
+        // when descending. The 20 meter threshold is arbitrary, and
+        // is basically to prevent situations where we try to slowly
+        // gain height at low altitudes, potentially hitting
+        // obstacles.
+        if (adjusted_relative_altitude_cm() > 2000 || above_location_current(next_WP_loc)) {
+            set_offset_altitude_location(prev_WP_loc, next_WP_loc);
+        } else {
+            reset_offset_altitude();
+        }
+        break;
     default:
         reset_offset_altitude();
         break;
@@ -755,6 +767,7 @@ const Plane::TerrainLookupTable Plane::Terrain_lookup[] = {
     {Mode::Number::FLY_BY_WIRE_B, terrain_bitmask::FLY_BY_WIRE_B},
     {Mode::Number::CRUISE, terrain_bitmask::CRUISE},
     {Mode::Number::AUTO, terrain_bitmask::AUTO},
+    {Mode::Number::AUTOLAND_G_SPOTS, terrain_bitmask::AUTOLAND_G_SPOTS},
     {Mode::Number::RTL, terrain_bitmask::RTL},
     {Mode::Number::AVOID_ADSB, terrain_bitmask::AVOID_ADSB},
     {Mode::Number::GUIDED, terrain_bitmask::GUIDED},

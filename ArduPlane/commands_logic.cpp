@@ -979,7 +979,7 @@ void Plane::do_set_home(const AP_Mission::Mission_Command& cmd)
 //      we double check that the flight mode is AUTO to avoid the possibility of ap-mission triggering actions while we're not in AUTO mode
 bool Plane::start_command_callback(const AP_Mission::Mission_Command &cmd)
 {
-    if (control_mode == &mode_auto) {
+    if ((control_mode == &mode_auto || (control_mode == &mode_autolandgspots))) {
         return start_command(cmd);
     }
     return true;
@@ -989,7 +989,7 @@ bool Plane::start_command_callback(const AP_Mission::Mission_Command &cmd)
 //      we double check that the flight mode is AUTO to avoid the possibility of ap-mission triggering actions while we're not in AUTO mode
 bool Plane::verify_command_callback(const AP_Mission::Mission_Command& cmd)
 {
-    if (control_mode == &mode_auto) {
+    if ((control_mode == &mode_auto) || (control_mode == &mode_autolandgspots)) {
         bool cmd_complete = verify_command(cmd);
 
         // send message to GCS
@@ -1006,7 +1006,7 @@ bool Plane::verify_command_callback(const AP_Mission::Mission_Command& cmd)
 //      we double check that the flight mode is AUTO to avoid the possibility of ap-mission triggering actions while we're not in AUTO mode
 void Plane::exit_mission_callback()
 {
-    if (control_mode == &mode_auto) {
+    if ((control_mode == &mode_auto) || (control_mode == &mode_auto)) {
         set_mode(mode_rtl, ModeReason::MISSION_END);
         gcs().send_text(MAV_SEVERITY_INFO, "Mission complete, changing mode to RTL");
     }
@@ -1191,7 +1191,7 @@ bool Plane::verify_nav_script_time(const AP_Mission::Mission_Command& cmd)
 bool Plane::nav_scripting_active(void) const
 {
     return !nav_scripting.done &&
-            control_mode == &mode_auto &&
+            ((control_mode == &mode_auto) || (control_mode == &mode_autolandgspots)) &&
             mission.get_current_nav_cmd().id == MAV_CMD_NAV_SCRIPT_TIME;
 }
 

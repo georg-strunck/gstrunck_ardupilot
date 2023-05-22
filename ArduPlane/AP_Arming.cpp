@@ -95,7 +95,8 @@ bool AP_Arming_Plane::pre_arm_checks(bool display_failure)
     ret &= quadplane_checks(display_failure);
 #endif
 
-    if (plane.control_mode == &plane.mode_auto && plane.mission.num_commands() <= 1) {
+    if (((plane.control_mode == &plane.mode_auto) || (plane.control_mode == &plane.mode_autolandgspots)) 
+        && plane.mission.num_commands() <= 1) {
         check_failed(display_failure, "No mission loaded");
         ret = false;
     }
@@ -191,17 +192,21 @@ bool AP_Arming_Plane::quadplane_checks(bool display_failure)
     }
 
     if (plane.quadplane.option_is_set(QuadPlane::OPTION::ONLY_ARM_IN_QMODE_OR_AUTO)) {
-        if (!plane.control_mode->is_vtol_mode() && (plane.control_mode != &plane.mode_auto) && (plane.control_mode != &plane.mode_guided)) {
+        if (!plane.control_mode->is_vtol_mode() && 
+            ((plane.control_mode != &plane.mode_auto) || (plane.control_mode != &plane.mode_autolandgspots)) && 
+            (plane.control_mode != &plane.mode_guided)) {
             check_failed(display_failure,"not in Q mode");
             ret = false;
         }
-        if ((plane.control_mode == &plane.mode_auto) && !plane.quadplane.is_vtol_takeoff(plane.mission.get_current_nav_cmd().id)) {
+        if (((plane.control_mode == &plane.mode_auto) || (plane.control_mode == &plane.mode_autolandgspots)) && 
+            !plane.quadplane.is_vtol_takeoff(plane.mission.get_current_nav_cmd().id)) {
             check_failed(display_failure,"not in VTOL takeoff");
             ret = false;
         }
     }
 
-    if ((plane.control_mode == &plane.mode_auto) && !plane.mission.starts_with_takeoff_cmd()) {
+    if (((plane.control_mode == &plane.mode_auto) || (plane.control_mode == &plane.mode_autolandgspots)) && 
+        !plane.mission.starts_with_takeoff_cmd()) {
         check_failed(display_failure,"missing takeoff waypoint");
         ret = false;
     }
@@ -353,7 +358,7 @@ bool AP_Arming_Plane::disarm(const AP_Arming::Method method, bool do_disarm_chec
     if (!AP_Arming::disarm(method, do_disarm_checks)) {
         return false;
     }
-    if (plane.control_mode != &plane.mode_auto) {
+    if ((plane.control_mode != &plane.mode_auto) || (plane.control_mode != &plane.mode_autolandgspots)) {
         // reset the mission on disarm if we are not in auto
         plane.mission.reset();
     }
