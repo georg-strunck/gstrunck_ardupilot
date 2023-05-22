@@ -508,7 +508,7 @@ void Plane::stabilize()
     if (control_mode == &mode_training) {
         stabilize_training(speed_scaler);
 #if AP_SCRIPTING_ENABLED
-    } else if ((control_mode == &mode_auto &&
+    } else if ((((control_mode == &mode_auto) || (control_mode == &mode_autolandgspots)) &&
                mission.get_current_nav_cmd().id == MAV_CMD_NAV_SCRIPT_TIME) || (nav_scripting.enabled && nav_scripting.current_ms > 0)) {
         // scripting is in control of roll and pitch rates and throttle
         const float aileron = rollController.get_rate_out(nav_scripting.roll_rate_dps, speed_scaler);

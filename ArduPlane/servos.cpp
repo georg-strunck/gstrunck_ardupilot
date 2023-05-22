@@ -37,7 +37,7 @@ void Plane::throttle_slew_limit(SRV_Channel::Aux_servo_function_t func)
     }
 
     uint8_t slewrate = aparm.throttle_slewrate;
-    if (control_mode == &mode_auto) {
+    if ((control_mode == &mode_auto) || (control_mode == &mode_autolandgspots)) {
         if (auto_state.takeoff_complete == false && g.takeoff_throttle_slewrate != 0) {
             slewrate = g.takeoff_throttle_slewrate;
         } else if (landing.get_throttle_slewrate() != 0 && flight_stage == AP_Vehicle::FixedWing::FLIGHT_LAND) {
@@ -97,7 +97,7 @@ bool Plane::suppress_throttle(void)
 
     bool gps_movement = (gps.status() >= AP_GPS::GPS_OK_FIX_2D && gps.ground_speed() >= 5);
     
-    if ((control_mode == &mode_auto &&
+    if ((((control_mode == &mode_auto) || (control_mode == &mode_autolandgspots)) &&
          auto_state.takeoff_complete == false) ||
         control_mode == &mode_takeoff) {
 
@@ -697,7 +697,7 @@ void Plane::set_servos_flaps(void)
  */
 void Plane::set_landing_gear(void)
 {
-    if (control_mode == &mode_auto && hal.util->get_soft_armed() && is_flying() && gear.last_flight_stage != flight_stage) {
+    if (((control_mode == &mode_auto) || (control_mode == &mode_autolandgspots)) && hal.util->get_soft_armed() && is_flying() && gear.last_flight_stage != flight_stage) {
         switch (flight_stage) {
         case AP_Vehicle::FixedWing::FLIGHT_LAND:
             g2.landing_gear.deploy_for_landing();
@@ -838,7 +838,7 @@ void Plane::set_servos(void)
     quadplane.update();
 #endif
 
-    if (control_mode == &mode_auto && auto_state.idle_mode) {
+    if (((control_mode == &mode_auto) || (control_mode == &mode_autolandgspots)) && auto_state.idle_mode) {
         // special handling for balloon launch
         set_servos_idle();
         servos_output();
@@ -940,7 +940,7 @@ void Plane::set_servos(void)
 void Plane::landing_neutral_control_surface_servos(void)
 {
     if (!(landing.get_then_servos_neutral() > 0 &&
-            control_mode == &mode_auto &&
+            ((control_mode == &mode_auto) || (control_mode == &mode_autolandgspots)) &&
             landing.get_disarm_delay() > 0 &&
             landing.is_complete() &&
             !arming.is_armed())) {

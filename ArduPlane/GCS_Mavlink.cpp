@@ -84,7 +84,9 @@ MAV_MODE GCS_MAVLINK_Plane::base_mode() const
     }
 
     if (plane.g.stick_mixing != StickMixing::NONE && plane.control_mode != &plane.mode_initializing) {
-        if ((plane.g.stick_mixing != StickMixing::VTOL_YAW) || (plane.control_mode == &plane.mode_auto)) {
+        if ((plane.g.stick_mixing != StickMixing::VTOL_YAW) || 
+            (plane.control_mode == &plane.mode_auto) || 
+            (plane.control_mode == &plane.mode_autolandgspots)) {
             // all modes except INITIALISING have some form of manual
             // override if stick mixing is enabled
             _base_mode |= MAV_MODE_FLAG_MANUAL_INPUT_ENABLED;
@@ -974,7 +976,8 @@ MAV_RESULT GCS_MAVLINK_Plane::handle_command_long_packet(const mavlink_command_l
         // this command should be ignored since it comes in from GCS
         // or a companion computer:
         if ((!plane.control_mode->is_guided_mode()) &&
-            (plane.control_mode != &plane.mode_auto)) {
+            (plane.control_mode != &plane.mode_auto)&&
+            (plane.control_mode != &plane.mode_autolandgspots)) {
             // failed
             return MAV_RESULT_FAILED;
         }
@@ -1384,7 +1387,8 @@ MAV_RESULT GCS_MAVLINK_Plane::handle_command_do_set_mission_current(const mavlin
 
     // if you change this you must change handle_mission_set_current
     plane.auto_state.next_wp_crosstrack = false;
-    if (plane.control_mode == &plane.mode_auto && plane.mission.state() == AP_Mission::MISSION_STOPPED) {
+    if (((plane.control_mode == &plane.mode_auto) || (plane.control_mode == &plane.mode_autolandgspots)) 
+        && plane.mission.state() == AP_Mission::MISSION_STOPPED) {
         plane.mission.resume();
     }
 
@@ -1396,7 +1400,8 @@ void GCS_MAVLINK_Plane::handle_mission_set_current(AP_Mission &mission, const ma
     // if you change this you must change handle_command_do_set_mission_current
     plane.auto_state.next_wp_crosstrack = false;
     GCS_MAVLINK::handle_mission_set_current(mission, msg);
-    if (plane.control_mode == &plane.mode_auto && plane.mission.state() == AP_Mission::MISSION_STOPPED) {
+    if (((plane.control_mode == &plane.mode_auto) || (plane.control_mode == &plane.mode_autolandgspots))
+        && plane.mission.state() == AP_Mission::MISSION_STOPPED) {
         plane.mission.resume();
     }
 }

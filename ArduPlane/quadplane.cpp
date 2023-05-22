@@ -1884,7 +1884,8 @@ void QuadPlane::update_throttle_suppression(void)
     }
 
     // allow for takeoff
-    if (plane.control_mode == &plane.mode_auto && is_vtol_takeoff(plane.mission.get_current_nav_cmd().id)) {
+    if (((plane.control_mode == &plane.mode_auto) || (plane.control_mode == &plane.mode_autolandgspots))
+        && is_vtol_takeoff(plane.mission.get_current_nav_cmd().id)) {
         return;
     }
 
@@ -3259,6 +3260,7 @@ bool QuadPlane::check_land_complete(void)
         poscontrol.set_state(QPOS_LAND_COMPLETE);
         gcs().send_text(MAV_SEVERITY_INFO,"Land complete");
         if (plane.control_mode != &plane.mode_auto ||
+            plane.control_mode != &plane.mode_autolandgspots ||
             !plane.mission.continue_after_land()) {
             // disarm on land unless we have MIS_OPTIONS setup to
             // continue after land in AUTO
@@ -3334,7 +3336,7 @@ bool QuadPlane::verify_vtol_land(void)
 #endif
             last_land_final_agl = plane.relative_ground_altitude(plane.g.rangefinder_landing);
             gcs().send_text(MAV_SEVERITY_INFO,"Land descend started");
-            if (plane.control_mode == &plane.mode_auto) {
+            if ((plane.control_mode == &plane.mode_auto) || (plane.control_mode == &plane.mode_auto)) {
                 // set height to mission height, so we can use the mission
                 // WP height for triggering land final if no rangefinder
                 // available
@@ -3617,10 +3619,11 @@ bool QuadPlane::guided_mode_enabled(void)
         return false;
     }
     // only use quadplane guided when in AUTO or GUIDED mode
-    if (plane.control_mode != &plane.mode_guided && plane.control_mode != &plane.mode_auto) {
+    if (plane.control_mode != &plane.mode_guided && 
+        ((plane.control_mode != &plane.mode_auto) || (plane.control_mode != &plane.mode_autolandgspots))) {
         return false;
     }
-    if (plane.control_mode == &plane.mode_auto &&
+    if (((plane.control_mode == &plane.mode_auto) || (plane.control_mode == &plane.mode_autolandgspots)) &&
         plane.mission.get_current_nav_cmd().id == MAV_CMD_NAV_LOITER_TURNS) {
         // loiter turns is a fixed wing only operation
         return false;
@@ -3902,7 +3905,7 @@ bool QuadPlane::in_vtol_airbrake(void) const
         poscontrol.get_state() == QPOS_AIRBRAKE) {
         return true;
     }
-    if (plane.control_mode == &plane.mode_auto &&
+    if (((plane.control_mode == &plane.mode_auto) ||(plane.control_mode == &plane.mode_autolandgspots)) &&
         is_vtol_land(plane.mission.get_current_nav_cmd().id) &&
         poscontrol.get_state() == QPOS_AIRBRAKE) {
         return true;

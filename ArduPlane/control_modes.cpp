@@ -204,7 +204,8 @@ bool Plane::fly_inverted(void)
         // controlled with aux switch
         return true;
     }
-    if (control_mode == &mode_auto && auto_state.inverted_flight) {
+    if (((control_mode == &mode_auto) || (control_mode == &mode_autolandgspots)) 
+        && auto_state.inverted_flight) {
         return true;
     }
     return false;

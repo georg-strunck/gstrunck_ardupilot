@@ -507,7 +507,7 @@ int32_t Plane::adjusted_relative_altitude_cm(void)
 float Plane::mission_alt_offset(void)
 {
     float ret = g.alt_offset;
-    if (control_mode == &mode_auto &&
+    if (((control_mode == &mode_auto) || (control_mode == &mode_autolandgspots)) &&
             (flight_stage == AP_Vehicle::FixedWing::FLIGHT_LAND || auto_state.wp_is_land_approach)) {
         // when landing after an aborted landing due to too high glide
         // slope we use an offset from the last landing attempt
@@ -682,7 +682,7 @@ void Plane::rangefinder_height_update(void)
 #if HAL_QUADPLANE_ENABLED
             if (control_mode == &mode_qland ||
                 control_mode == &mode_qrtl ||
-                (control_mode == &mode_auto && quadplane.is_vtol_land(plane.mission.get_current_nav_cmd().id))) {
+                (((control_mode == &mode_auto) || (control_mode == &mode_autolandgspots)) && quadplane.is_vtol_land(plane.mission.get_current_nav_cmd().id))) {
                 flightstage_good_for_rangefinder_landing = true;
             }
 #endif

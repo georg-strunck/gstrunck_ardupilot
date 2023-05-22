@@ -3,11 +3,13 @@
 
 bool ModeAUTOLAND_G_SPOTS::_enter()
 {
+    gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: ENTERed GSPOTs mode");
 #if HAL_QUADPLANE_ENABLED
     // check if we should refuse auto mode due to a missing takeoff in
     // guided_wait_takeoff state
     if (plane.previous_mode == &plane.mode_guided &&
         quadplane.guided_wait_takeoff_on_mode_enter) {
+        gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: Previous mode guided and no tkoff waypoint");
         if (!plane.mission.starts_with_takeoff_cmd()) {
             gcs().send_text(MAV_SEVERITY_ERROR,"Takeoff waypoint required");
             quadplane.guided_wait_takeoff = true;
@@ -44,6 +46,7 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
 
 void ModeAUTOLAND_G_SPOTS::_exit()
 {
+    gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: EXITed GSPOTs mode");
     if (plane.mission.state() == AP_Mission::MISSION_RUNNING) {
         plane.mission.stop();
 
@@ -62,11 +65,14 @@ void ModeAUTOLAND_G_SPOTS::_exit()
 
 void ModeAUTOLAND_G_SPOTS::update()
 {
+    static uint8_t GSPOTcntr_update = 0; GSPOTcntr_update++;
+    if (GSPOTcntr_update>50) {gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: UPDATEing GSPOTs mode"); GSPOTcntr_update=0;}
+    // gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: UPDATEing GSPOTs mode");
     if (plane.mission.state() != AP_Mission::MISSION_RUNNING) {
         // this could happen if AP_Landing::restart_landing_sequence() returns false which would only happen if:
         // restart_landing_sequence() is called when not executing a NAV_LAND or there is no previous nav point
         plane.set_mode(plane.mode_rtl, ModeReason::MISSION_END);
-        gcs().send_text(MAV_SEVERITY_INFO, "Aircraft in auto without a running mission");
+        gcs().send_text(MAV_SEVERITY_INFO, "Aircraft in auto GSPOT without a running mission");
         return;
     }
 
@@ -81,10 +87,14 @@ void ModeAUTOLAND_G_SPOTS::update()
 
     if (nav_cmd_id == MAV_CMD_NAV_TAKEOFF ||
         (nav_cmd_id == MAV_CMD_NAV_LAND && plane.flight_stage == AP_Vehicle::FixedWing::FLIGHT_ABORT_LAND)) {
+        static uint8_t GSPOTcntr_tko = 0; GSPOTcntr_tko++;
+        if (GSPOTcntr_tko>50) {gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: Received TKOFF or land abort command"); GSPOTcntr_tko=0;}
+        // gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: Received TKOFF or land abort command");
         plane.takeoff_calc_roll();
         plane.takeoff_calc_pitch();
         plane.calc_throttle();
     } else if (nav_cmd_id == MAV_CMD_NAV_LAND) {
+        gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: Auto landing on the GSPOT");
         plane.calc_nav_roll();
         plane.calc_nav_pitch();
 
@@ -107,6 +117,7 @@ void ModeAUTOLAND_G_SPOTS::update()
     } else {
         // we are doing normal AUTO flight, the special cases
         // are for takeoff and landing
+        gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: Continuing auto flight");
         if (nav_cmd_id != MAV_CMD_NAV_CONTINUE_AND_CHANGE_ALT) {
             plane.steer_state.hold_course_cd = -1;
         }
@@ -118,6 +129,9 @@ void ModeAUTOLAND_G_SPOTS::update()
 
 void ModeAUTOLAND_G_SPOTS::navigate()
 {
+    static uint8_t GSPOTcntr_nav = 0; GSPOTcntr_nav++;
+    if (GSPOTcntr_nav>50) {gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: Navigating update entered"); GSPOTcntr_nav=0;}
+    // gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: Navigating update entered");
     if (AP::ahrs().home_is_set()) {
         plane.mission.update();
     }
@@ -126,6 +140,9 @@ void ModeAUTOLAND_G_SPOTS::navigate()
 
 bool ModeAUTOLAND_G_SPOTS::does_auto_navigation() const
 {
+    static uint8_t GSPOTcntr_anav = 0; GSPOTcntr_anav++;
+    if (GSPOTcntr_anav>50) {gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: In auto nav?"); GSPOTcntr_anav=0;}
+    // gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: In auto nav?");
 #if AP_SCRIPTING_ENABLED
    return (!plane.nav_scripting_active());
 #endif
@@ -134,6 +151,9 @@ bool ModeAUTOLAND_G_SPOTS::does_auto_navigation() const
 
 bool ModeAUTOLAND_G_SPOTS::does_auto_throttle() const
 {
+    static uint8_t GSPOTcntr_thr = 0; GSPOTcntr_thr++;
+    if (GSPOTcntr_thr>50) {gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: In auto nav?"); GSPOTcntr_thr=0;}
+    // gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: auto_throttle on?");
 #if AP_SCRIPTING_ENABLED
    return (!plane.nav_scripting_active());
 #endif
