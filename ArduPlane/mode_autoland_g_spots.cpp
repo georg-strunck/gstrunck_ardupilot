@@ -23,6 +23,13 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
 #else
     plane.auto_state.vtol_mode = false;
 #endif
+
+    // Get home point (location where the plane was ARMed! (not turned on or safety switch))
+
+    // Delete auto mission
+
+    // Create new autoland mission
+
     plane.next_WP_loc = plane.prev_WP_loc = plane.current_loc;
     // start or resume the mission, based on MIS_AUTORESET
     plane.mission.start_or_resume();
@@ -99,6 +106,7 @@ void ModeAUTOLAND_G_SPOTS::update()
         } else {
             plane.calc_throttle();
         }
+        
 #if AP_SCRIPTING_ENABLED
     } else if (nav_cmd_id == MAV_CMD_NAV_SCRIPT_TIME) {
         // NAV_SCRIPTING has a desired roll and pitch rate and desired throttle
