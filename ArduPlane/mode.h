@@ -205,6 +205,11 @@ public:
 
     bool does_auto_throttle() const override;
 
+    void gspot_calc_lat_from_latlngdistheading(
+                int32_t gspot_latitude1_deg, int32_t gspot_longitude1_deg, 
+                int gspot_distance, double gspot_heading_rad,
+                int32_t* gspot_latitude2_deg, int32_t* gspot_longitude2_deg);
+
 protected:
 
     bool _enter() override;
