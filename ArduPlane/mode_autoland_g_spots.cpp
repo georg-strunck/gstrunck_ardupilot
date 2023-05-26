@@ -43,11 +43,10 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
 
     // Define approach WP2 location by distance and heading from touchdownpoint
     const int32_t   gspot_WP2_alt              = 3000;    // [cm] WP2 altidude
-    const double    gspot_heading_runway_deg   = plane.initial_armed_bearing;     // [deg] Heading of the runway, direction as was armed
-    const double    gspot_heading_runway_rad   = 2*M_PI*(gspot_heading_runway_deg/360); // [rad] above
+    float           gspot_heading_runway_rad   = plane.initial_armed_bearing; // [rad] Heading of the runway cw from true north, direction as was armed
     const int       gspot_dist_approach        = 300;      // [m] Horizontal distance of how far away the last waypoint in the air is (approach waypoint)
     int32_t gspot_latitude2_t, gspot_longitude2_t;         // [deg*1e7] Latitude and Longitude of WP2 in 1e7 degree, as used in Location type
-
+    gcs().send_text(MAV_SEVERITY_INFO, "arm heading at %f [rad]", gspot_heading_runway_rad);
     //Calculate approach waypoint (WP2) latitude and longitude
     ModeAUTOLAND_G_SPOTS::gspot_calc_lat_from_latlngdistheading(
                                 gspot_loc_home.lat, gspot_loc_home.lng, 

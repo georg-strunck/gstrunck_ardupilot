@@ -373,8 +373,7 @@ bool AP_Arming_Plane::arm(const AP_Arming::Method method, const bool do_arming_c
     delay_arming = true;
 
     // Set orientation during arming state (similar to copter)
-    plane.initial_armed_bearing = AP::ahrs().yaw_sensor;
-
+    plane.initial_armed_bearing = AP::ahrs().get_yaw();       // [rad] from North clockwise, returns AP::ahrs().yaw
     gcs().send_text(MAV_SEVERITY_INFO, "Throttle armed");
 
     return true;

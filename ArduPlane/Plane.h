@@ -761,7 +761,7 @@ private:
     uint32_t last_home_update_ms;
 
     // Stores initial bearing when armed
-    int32_t initial_armed_bearing;
+    float initial_armed_bearing;
 
     // Camera/Antenna mount tracking and stabilisation stuff
 #if HAL_MOUNT_ENABLED
