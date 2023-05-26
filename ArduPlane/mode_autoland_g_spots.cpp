@@ -41,12 +41,18 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
     // plane.mission.start();
     // Create new autoland mission
 
+    // Get wind direction in [deg] from North cw and calculate the total windspeed
+    Vector3f gspot_wind         = AP::ahrs().wind_estimate();
+    double   gspot_wind_heading = degrees(atan2f(-gspot_wind.y, -gspot_wind.x));
+    double   gspot_wind_total   = sqrt(pow(gspot_wind.x, 2) + pow(gspot_wind.y, 2));
+    gcs().send_text(MAV_SEVERITY_INFO, "Wind speed: %f [m/s]; Wind direction: %f [deg] from north cw", gspot_wind_total, gspot_wind_heading);
+
     // Define approach WP2 location by distance and heading from touchdownpoint
     const int32_t   gspot_WP2_alt              = 3000;    // [cm] WP2 altidude
     float           gspot_heading_runway_rad   = plane.initial_armed_bearing; // [rad] Heading of the runway cw from true north, direction as was armed
     const int       gspot_dist_approach        = 300;      // [m] Horizontal distance of how far away the last waypoint in the air is (approach waypoint)
     int32_t gspot_latitude2_t, gspot_longitude2_t;         // [deg*1e7] Latitude and Longitude of WP2 in 1e7 degree, as used in Location type
-    gcs().send_text(MAV_SEVERITY_INFO, "arm heading at %f [rad]", gspot_heading_runway_rad);
+    
     //Calculate approach waypoint (WP2) latitude and longitude
     ModeAUTOLAND_G_SPOTS::gspot_calc_lat_from_latlngdistheading(
                                 gspot_loc_home.lat, gspot_loc_home.lng, 
@@ -208,13 +214,13 @@ void ModeAUTOLAND_G_SPOTS::gspot_calc_lat_from_latlngdistheading(
     http://www.movable-type.co.uk/scripts/latlong.html 
     Note that the input and output values for long and lat deg are in 1e7 deg!, all other vars require SI (m, rad)
     */
+
     const double gspot_delta = gspot_distance/(6.3781*1.0e+6);
-    double gspot_latitude2_rad    = asin(sin((2*M_PI*(gspot_latitude1_deg*(1.0e-7))/360))*cos(gspot_delta) + 
-                                cos((2*M_PI*(gspot_latitude1_deg*(1.0e-7))/360))*sin(gspot_delta)*cos(gspot_heading_rad));
-    double gspot_longitude2_rad   = (2*M_PI*(gspot_longitude1_deg*(1.0e-7))/360) + 
-                                atan2(sin(gspot_heading_rad)*sin(gspot_delta)*cos((2*M_PI*(gspot_latitude1_deg*(1.0e-7))/360)), 
-                                cos(gspot_delta)-sin((2*M_PI*(gspot_latitude1_deg*(1.0e-7))/360))*sin(gspot_latitude2_rad));
-    *gspot_latitude2_deg  = int((gspot_latitude2_rad*360/(2*M_PI))*1.0e7);
-    *gspot_longitude2_deg = int(((fmodf((gspot_longitude2_rad*360/(2*M_PI))+ 540, 360))-180)*1e7);
-    // *gspot_longitude2_deg = ((int((gspot_longitude2_rad*360/(2*M_PI))*1.0e7) + 540*int(1.0e7))%int(360*1.0e7)-180*1.0e7);
+    double gspot_latitude2_rad    = asin(sin(radians(gspot_latitude1_deg)*(1.0e-7))*cos(gspot_delta) + 
+                                cos(radians(gspot_latitude1_deg)*(1.0e-7))*sin(gspot_delta)*cos(gspot_heading_rad));
+    double gspot_longitude2_rad   = (radians(gspot_longitude1_deg)*(1.0e-7)) + 
+                                atan2(sin(gspot_heading_rad)*sin(gspot_delta)*cos(radians(gspot_latitude1_deg)*(1.0e-7)), 
+                                cos(gspot_delta)-sin(radians(gspot_latitude1_deg)*(1.0e-7))*sin(gspot_latitude2_rad));
+    *gspot_latitude2_deg  = int(degrees(gspot_latitude2_rad)*1.0e7);
+    *gspot_longitude2_deg = int(((fmodf(degrees(gspot_longitude2_rad)+ 540, 360))-180)*1e7);
 }
