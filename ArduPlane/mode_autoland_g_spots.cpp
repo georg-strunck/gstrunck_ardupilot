@@ -32,6 +32,8 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
    // Get home point (location where the plane was ARMed! (not turned on or safety switch))
     Location gspot_loc_home{ AP::ahrs().get_home() };
     gcs().send_text(MAV_SEVERITY_INFO, "Home location at: %f Latitude, %f Longitude, %f Altitude", gspot_loc_home.lat* 1.0e-7, gspot_loc_home.lng* 1.0e-7, gspot_loc_home.alt* 1.0e-2);
+    // Get arming point heading
+    AP::logger().get_log_data()
 
     /* 
     ________________ Mission functions found in AP_Mission.h/.cpp _______________________
