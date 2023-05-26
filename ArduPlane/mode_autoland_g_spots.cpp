@@ -32,8 +32,6 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
    // Get home point (location where the plane was ARMed! (not turned on or safety switch))
     Location gspot_loc_home{ AP::ahrs().get_home() };
     gcs().send_text(MAV_SEVERITY_INFO, "Home location at: %f Latitude, %f Longitude, %f Altitude", gspot_loc_home.lat* 1.0e-7, gspot_loc_home.lng* 1.0e-7, gspot_loc_home.alt* 1.0e-2);
-    // Get arming point heading
-    AP::logger().get_log_data()
 
     /* 
     ________________ Mission functions found in AP_Mission.h/.cpp _______________________
@@ -45,7 +43,7 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
 
     // Define approach WP2 location by distance and heading from touchdownpoint
     const int32_t   gspot_WP2_alt              = 3000;    // [cm] WP2 altidude
-    const double    gspot_heading_runway_deg   = -193;     // [deg] Heading of the runway, direction as was armed
+    const double    gspot_heading_runway_deg   = plane.initial_armed_bearing;     // [deg] Heading of the runway, direction as was armed
     const double    gspot_heading_runway_rad   = 2*M_PI*(gspot_heading_runway_deg/360); // [rad] above
     const int       gspot_dist_approach        = 300;      // [m] Horizontal distance of how far away the last waypoint in the air is (approach waypoint)
     int32_t gspot_latitude2_t, gspot_longitude2_t;         // [deg*1e7] Latitude and Longitude of WP2 in 1e7 degree, as used in Location type
