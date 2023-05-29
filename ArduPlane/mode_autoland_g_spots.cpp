@@ -37,7 +37,7 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
     ________________ Mission functions found in AP_Mission.h/.cpp _______________________
     */
     // Delete auto mission
-    // plane.mission.clear();
+    plane.mission.clear();
     // plane.mission.start();
     // Create new autoland mission
 
@@ -61,28 +61,57 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
     gcs().send_text(MAV_SEVERITY_INFO, "WP at %i, %i", gspot_latitude2_t, gspot_longitude2_t);
     Location gspot_loc_WP2 {gspot_latitude2_t, gspot_longitude2_t, gspot_WP2_alt, Location::AltFrame::ABOVE_HOME};
 
+    // Add dummy waypoint WPinf because it somehow does not take the first WP into the mission
+    AP_Mission::Mission_Command gspot_cmd_WPinf;
+    gspot_cmd_WPinf.id = MAV_CMD_NAV_WAYPOINT;
+    gspot_cmd_WPinf.content.location = gspot_loc_WP2;
+    bool WPd_sent = plane.mission.add_cmd(gspot_cmd_WPinf);
+    if (WPd_sent){gcs().send_text(MAV_SEVERITY_INFO, "WPinf sent succesfully!");}
+    else {gcs().send_text(MAV_SEVERITY_INFO, "WPinf sending ERROR");} 
+
+    // Add RTL WP5
+    Location gspot_loc_WP5 {gspot_loc_home.lat, gspot_loc_home.lng, gspot_WP2_alt, Location::AltFrame::ABOVE_HOME};
+    AP_Mission::Mission_Command gspot_cmd_WP5;
+    gspot_cmd_WP5.id = MAV_CMD_NAV_WAYPOINT;
+    gspot_cmd_WP5.content.location = gspot_loc_WP5;
+    bool WP5_sent = plane.mission.add_cmd(gspot_cmd_WP5);
+    if (WP5_sent){gcs().send_text(MAV_SEVERITY_INFO, "WP5 sent succesfully!");}
+    else {gcs().send_text(MAV_SEVERITY_INFO, "WP5 sending ERROR");} 
+
+    // Add loiter time WP4
+    AP_Mission::Mission_Command gspot_cmd_WP4;
+    gspot_cmd_WP4.id = MAV_CMD_NAV_LOITER_TIME;
+    gspot_cmd_WP4.p1 = 10;
+    gspot_cmd_WP4.content.location = gspot_loc_WP5;
+    bool WP4_sent = plane.mission.add_cmd(gspot_cmd_WP4);
+    if (WP4_sent){gcs().send_text(MAV_SEVERITY_INFO, "WP4 sent succesfully!");}
+    else {gcs().send_text(MAV_SEVERITY_INFO, "WP4 sending ERROR");} 
+
     // Add loiter to alt WP3
     AP_Mission::Mission_Command gspot_cmd_WP3;
     gspot_cmd_WP3.id = MAV_CMD_NAV_LOITER_TO_ALT;
     gspot_cmd_WP3.content.location = gspot_loc_WP2;
-    plane.mission.add_cmd(gspot_cmd_WP3);
+    bool WP3_sent = plane.mission.add_cmd(gspot_cmd_WP3);
+    if (WP3_sent){gcs().send_text(MAV_SEVERITY_INFO, "WP3 sent succesfully!");}
+    else {gcs().send_text(MAV_SEVERITY_INFO, "WP3 sending ERROR");} 
 
 
     // Add final approach waypoint WP2
     AP_Mission::Mission_Command gspot_cmd_WP2;
     gspot_cmd_WP2.id = MAV_CMD_NAV_WAYPOINT;
     gspot_cmd_WP2.content.location = gspot_loc_WP2;
-    plane.mission.add_cmd(gspot_cmd_WP2);
+    bool WP2_sent = plane.mission.add_cmd(gspot_cmd_WP2);
+    if (WP2_sent){gcs().send_text(MAV_SEVERITY_INFO, "WP2 sent succesfully!");}
+    else {gcs().send_text(MAV_SEVERITY_INFO, "WP2 sending ERROR");} 
 
     // Add landing point WP1
     AP_Mission::Mission_Command gspot_cmd_WP1;
     gspot_cmd_WP1.id = MAV_CMD_NAV_LAND;
     gspot_cmd_WP1.content.location = gspot_loc_home;
-
-    bool wait_for_mission_sent = plane.mission.add_cmd(gspot_cmd_WP1);
-    if (wait_for_mission_sent){gcs().send_text(MAV_SEVERITY_INFO, "WP sent succesfully!");}
+    bool WP1_sent = plane.mission.add_cmd(gspot_cmd_WP1);
+    if (WP1_sent){gcs().send_text(MAV_SEVERITY_INFO, "WP1 sent succesfully!");}
     // Felicidades, aquí está el rhinoceronte ;)
-    else {gcs().send_text(MAV_SEVERITY_INFO, "WP sending ERROR");}    
+    else {gcs().send_text(MAV_SEVERITY_INFO, "WP1 sending ERROR");}    
     
     plane.next_WP_loc = plane.prev_WP_loc = plane.current_loc;
     // start or resume the mission, based on MIS_AUTORESET
@@ -140,6 +169,10 @@ void ModeAUTOLAND_G_SPOTS::update()
         return;
     }
 #endif
+
+    if (nav_cmd_id == MAV_CMD_NAV_LOITER_TIME) {
+        gcs().send_text(MAV_SEVERITY_INFO, "In Loiter time mode :)");
+    }
 
     if (nav_cmd_id == MAV_CMD_NAV_TAKEOFF ||
         (nav_cmd_id == MAV_CMD_NAV_LAND && plane.flight_stage == AP_Vehicle::FixedWing::FLIGHT_ABORT_LAND)) {
