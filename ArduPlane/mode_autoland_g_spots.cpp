@@ -31,87 +31,38 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
     */
    // Get home point (location where the plane was ARMed! (not turned on or safety switch))
     Location gspot_loc_home{ AP::ahrs().get_home() };
-    gcs().send_text(MAV_SEVERITY_INFO, "Home location at: %f Latitude, %f Longitude, %f Altitude", gspot_loc_home.lat* 1.0e-7, gspot_loc_home.lng* 1.0e-7, gspot_loc_home.alt* 1.0e-2);
-
+    // gcs().send_text(MAV_SEVERITY_INFO, "Home location at: %f Latitude, %f Longitude, %f Altitude", gspot_loc_home.lat* 1.0e-7, gspot_loc_home.lng* 1.0e-7, gspot_loc_home.alt* 1.0e-2);
+    const int32_t   gspot_WP5_alt = plane.get_RTL_altitude_cm();    // [cm] WP5 altidude is equal to rtl alt (ALT_HOLD_RTL parameter)
+    Location        gspot_loc_WP5 {gspot_loc_home.lat, gspot_loc_home.lng, gspot_WP5_alt, Location::AltFrame::ABSOLUTE}; // Location object WP5_alt above home, used for dummy WPinf, WP5 and WP4
+        
     /* 
     ________________ Mission functions found in AP_Mission.h/.cpp _______________________
     */
     // Delete auto mission
     plane.mission.clear();
     // plane.mission.start();
-    // Create new autoland mission
-
-    // Get wind direction in [deg] from North cw and calculate the total windspeed
-    Vector3f gspot_wind         = AP::ahrs().wind_estimate();
-    double   gspot_wind_heading = degrees(atan2f(-gspot_wind.y, -gspot_wind.x));
-    double   gspot_wind_total   = sqrt(pow(gspot_wind.x, 2) + pow(gspot_wind.y, 2));
-    gcs().send_text(MAV_SEVERITY_INFO, "Wind speed: %f [m/s]; Wind direction: %f [deg] from north cw", gspot_wind_total, gspot_wind_heading);
-
-    // Define approach WP2 location by distance and heading from touchdownpoint
-    const int32_t   gspot_WP2_alt              = 3000;    // [cm] WP2 altidude
-    float           gspot_heading_runway_rad   = plane.initial_armed_bearing; // [rad] Heading of the runway cw from true north, direction as was armed
-    const int       gspot_dist_approach        = 300;      // [m] Horizontal distance of how far away the last waypoint in the air is (approach waypoint)
-    int32_t gspot_latitude2_t, gspot_longitude2_t;         // [deg*1e7] Latitude and Longitude of WP2 in 1e7 degree, as used in Location type
-    
-    //Calculate approach waypoint (WP2) latitude and longitude
-    ModeAUTOLAND_G_SPOTS::gspot_calc_lat_from_latlngdistheading(
-                                gspot_loc_home.lat, gspot_loc_home.lng, 
-                                gspot_dist_approach, gspot_heading_runway_rad,
-                                &gspot_latitude2_t, &gspot_longitude2_t);
-    gcs().send_text(MAV_SEVERITY_INFO, "WP at %i, %i", gspot_latitude2_t, gspot_longitude2_t);
-    Location gspot_loc_WP2 {gspot_latitude2_t, gspot_longitude2_t, gspot_WP2_alt, Location::AltFrame::ABOVE_HOME};
 
     // Add dummy waypoint WPinf because it somehow does not take the first WP into the mission
     AP_Mission::Mission_Command gspot_cmd_WPinf;
     gspot_cmd_WPinf.id = MAV_CMD_NAV_WAYPOINT;
-    gspot_cmd_WPinf.content.location = gspot_loc_WP2;
-    bool WPd_sent = plane.mission.add_cmd(gspot_cmd_WPinf);
-    if (WPd_sent){gcs().send_text(MAV_SEVERITY_INFO, "WPinf sent succesfully!");}
-    else {gcs().send_text(MAV_SEVERITY_INFO, "WPinf sending ERROR");} 
+    gspot_cmd_WPinf.content.location = gspot_loc_WP5;
+    plane.mission.add_cmd(gspot_cmd_WPinf);
 
     // Add RTL WP5
-    Location gspot_loc_WP5 {gspot_loc_home.lat, gspot_loc_home.lng, gspot_WP2_alt, Location::AltFrame::ABOVE_HOME};
     AP_Mission::Mission_Command gspot_cmd_WP5;
     gspot_cmd_WP5.id = MAV_CMD_NAV_WAYPOINT;
     gspot_cmd_WP5.content.location = gspot_loc_WP5;
-    bool WP5_sent = plane.mission.add_cmd(gspot_cmd_WP5);
-    if (WP5_sent){gcs().send_text(MAV_SEVERITY_INFO, "WP5 sent succesfully!");}
-    else {gcs().send_text(MAV_SEVERITY_INFO, "WP5 sending ERROR");} 
+    plane.mission.add_cmd(gspot_cmd_WP5);
 
     // Add loiter time WP4
     AP_Mission::Mission_Command gspot_cmd_WP4;
     gspot_cmd_WP4.id = MAV_CMD_NAV_LOITER_TIME;
-    gspot_cmd_WP4.p1 = 10;
+    gspot_cmd_WP4.p1 = 10;                              // Loiter time in [s]
     gspot_cmd_WP4.content.location = gspot_loc_WP5;
-    bool WP4_sent = plane.mission.add_cmd(gspot_cmd_WP4);
-    if (WP4_sent){gcs().send_text(MAV_SEVERITY_INFO, "WP4 sent succesfully!");}
-    else {gcs().send_text(MAV_SEVERITY_INFO, "WP4 sending ERROR");} 
+    plane.mission.add_cmd(gspot_cmd_WP4);
 
-    // Add loiter to alt WP3
-    AP_Mission::Mission_Command gspot_cmd_WP3;
-    gspot_cmd_WP3.id = MAV_CMD_NAV_LOITER_TO_ALT;
-    gspot_cmd_WP3.content.location = gspot_loc_WP2;
-    bool WP3_sent = plane.mission.add_cmd(gspot_cmd_WP3);
-    if (WP3_sent){gcs().send_text(MAV_SEVERITY_INFO, "WP3 sent succesfully!");}
-    else {gcs().send_text(MAV_SEVERITY_INFO, "WP3 sending ERROR");} 
-
-
-    // Add final approach waypoint WP2
-    AP_Mission::Mission_Command gspot_cmd_WP2;
-    gspot_cmd_WP2.id = MAV_CMD_NAV_WAYPOINT;
-    gspot_cmd_WP2.content.location = gspot_loc_WP2;
-    bool WP2_sent = plane.mission.add_cmd(gspot_cmd_WP2);
-    if (WP2_sent){gcs().send_text(MAV_SEVERITY_INFO, "WP2 sent succesfully!");}
-    else {gcs().send_text(MAV_SEVERITY_INFO, "WP2 sending ERROR");} 
-
-    // Add landing point WP1
-    AP_Mission::Mission_Command gspot_cmd_WP1;
-    gspot_cmd_WP1.id = MAV_CMD_NAV_LAND;
-    gspot_cmd_WP1.content.location = gspot_loc_home;
-    bool WP1_sent = plane.mission.add_cmd(gspot_cmd_WP1);
-    if (WP1_sent){gcs().send_text(MAV_SEVERITY_INFO, "WP1 sent succesfully!");}
-    // Felicidades, aquí está el rhinoceronte ;)
-    else {gcs().send_text(MAV_SEVERITY_INFO, "WP1 sending ERROR");}    
+    // Set bool for next waypoints (see update)
+    ModeAUTOLAND_G_SPOTS::gspots_land_mission_written = false;  
     
     plane.next_WP_loc = plane.prev_WP_loc = plane.current_loc;
     // start or resume the mission, based on MIS_AUTORESET
@@ -170,9 +121,69 @@ void ModeAUTOLAND_G_SPOTS::update()
     }
 #endif
 
-    if (nav_cmd_id == MAV_CMD_NAV_LOITER_TIME) {
-        gcs().send_text(MAV_SEVERITY_INFO, "In Loiter time mode :)");
+    /* 
+    ____________ START: Create land mission waypoints based on windspeed ______________
+    */ 
+
+    if (nav_cmd_id == MAV_CMD_NAV_LOITER_TIME && !ModeAUTOLAND_G_SPOTS::gspots_land_mission_written)
+    {
+        // Get wind info
+        double gspot_wind_heading_deg_cw_from_north, gspot_wind_vel_total_mps;
+        Vector3f gspot_wind                     = AP::ahrs().wind_estimate();
+        gspot_wind_heading_deg_cw_from_north   = degrees(atan2f(-gspot_wind.y, -gspot_wind.x));
+        gspot_wind_vel_total_mps               = sqrt(pow(gspot_wind.x, 2) + pow(gspot_wind.y, 2));
+        if (gspot_wind_heading_deg_cw_from_north < 0.){gspot_wind_heading_deg_cw_from_north = 360 + gspot_wind_heading_deg_cw_from_north;}
+        gcs().send_text(MAV_SEVERITY_INFO, "Wind speed: %f [m/s]; Wind direction: %f [deg] from north cw", gspot_wind_vel_total_mps, gspot_wind_heading_deg_cw_from_north);
+
+        
+        // Define approach waypoint location by distance and heading from touchdownpoint
+        const int32_t   gspot_WP2_alt              = 3000;                          // [cm] WP2 altidude
+        int             gspot_dist_approach        = 300;                           // [m] Horizontal distance of how far away the last waypoint in the air is (approach waypoint)
+        int32_t         gspot_latitude2_t, gspot_longitude2_t;                      // [deg*1e7] Latitude and Longitude of WP2 in 1e7 degree, as used in Location type
+        float           gspot_heading_runway_rad   = plane.initial_armed_bearing;   // [rad] Heading of the runway cw from true north, direction as was armed
+        Location        gspot_loc_home{ AP::ahrs().get_home() };                    // Get home location
+
+        // if the wind is coming from the back turn into the wind for landing
+        if (fabs(gspot_wind_heading_deg_cw_from_north - degrees(plane.initial_armed_bearing)) >= 95)
+            {gspot_dist_approach = - gspot_dist_approach;}
+            
+        
+        //Calculate approach waypoint latitude and longitude
+        ModeAUTOLAND_G_SPOTS::gspot_calc_lat_from_latlngdistheading(
+                                    gspot_loc_home.lat, gspot_loc_home.lng, 
+                                    -gspot_dist_approach, gspot_heading_runway_rad,
+                                    &gspot_latitude2_t, &gspot_longitude2_t);
+        Location gspot_loc_WP2 {gspot_latitude2_t, gspot_longitude2_t, gspot_WP2_alt, Location::AltFrame::ABOVE_HOME};
+
+        // Add loiter to alt WP3
+        AP_Mission::Mission_Command gspot_cmd_WP3;
+        gspot_cmd_WP3.id = MAV_CMD_NAV_LOITER_TO_ALT;
+        gspot_cmd_WP3.content.location = gspot_loc_WP2;
+        plane.mission.add_cmd(gspot_cmd_WP3);
+
+
+        // Add final approach waypoint WP2
+        AP_Mission::Mission_Command gspot_cmd_WP2;
+        gspot_cmd_WP2.id = MAV_CMD_NAV_WAYPOINT;
+        gspot_cmd_WP2.content.location = gspot_loc_WP2;
+        plane.mission.add_cmd(gspot_cmd_WP2);
+
+        // Add landing point WP1
+        AP_Mission::Mission_Command gspot_cmd_WP1;
+        gspot_cmd_WP1.id = MAV_CMD_NAV_LAND;
+        gspot_cmd_WP1.content.location = gspot_loc_home;
+        plane.mission.add_cmd(gspot_cmd_WP1);
+        // bool WP1_sent = plane.mission.add_cmd(gspot_cmd_WP1);
+        // if (WP1_sent){gcs().send_text(MAV_SEVERITY_INFO, "WP1 sent succesfully!");}
+        // // Felicidades, aquí está el rhinoceronte ;)
+        // else {gcs().send_text(MAV_SEVERITY_INFO, "WP1 sending ERROR");} 
+
+        ModeAUTOLAND_G_SPOTS::gspots_land_mission_written = true;
     }
+
+    /* 
+    ____________ END: Create land mission waypoints based on windspeed ______________
+    */ 
 
     if (nav_cmd_id == MAV_CMD_NAV_TAKEOFF ||
         (nav_cmd_id == MAV_CMD_NAV_LAND && plane.flight_stage == AP_Vehicle::FixedWing::FLIGHT_ABORT_LAND)) {

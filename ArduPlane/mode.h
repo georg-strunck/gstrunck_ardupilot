@@ -192,6 +192,8 @@ public:
     const char *name() const override { return "AUTOLAND_G_SPOTS"; }
     const char *name4() const override { return "SPOT"; }
 
+    bool gspots_land_mission_written;
+
     bool does_automatic_thermal_switch() const override { return true; }
 
     // methods that affect movement of the vehicle in this mode
