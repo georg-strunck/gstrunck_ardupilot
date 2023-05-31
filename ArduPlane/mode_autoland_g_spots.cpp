@@ -34,7 +34,7 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
     // gcs().send_text(MAV_SEVERITY_INFO, "Home location at: %f Latitude, %f Longitude, %f Altitude", gspot_loc_home.lat* 1.0e-7, gspot_loc_home.lng* 1.0e-7, gspot_loc_home.alt* 1.0e-2);
     const int32_t   gspot_WP5_alt = plane.get_RTL_altitude_cm();    // [cm] WP5 altidude is equal to rtl alt (ALT_HOLD_RTL parameter)
     Location        gspot_loc_WP5 {gspot_loc_home.lat, gspot_loc_home.lng, gspot_WP5_alt, Location::AltFrame::ABSOLUTE}; // Location object WP5_alt above home, used for dummy WPinf, WP5 and WP4
-        
+    
     /* 
     ________________ Mission functions found in AP_Mission.h/.cpp _______________________
     */
@@ -62,7 +62,7 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
     plane.mission.add_cmd(gspot_cmd_WP4);
 
     // Set bool for next waypoints (see update)
-    ModeAUTOLAND_G_SPOTS::gspots_land_mission_written = false;  
+    ModeAUTOLAND_G_SPOTS::gspot_land_mission_written = false;
     
     plane.next_WP_loc = plane.prev_WP_loc = plane.current_loc;
     // start or resume the mission, based on MIS_AUTORESET
@@ -125,16 +125,22 @@ void ModeAUTOLAND_G_SPOTS::update()
     ____________ START: Create land mission waypoints based on windspeed ______________
     */ 
 
-    if (nav_cmd_id == MAV_CMD_NAV_LOITER_TIME && !ModeAUTOLAND_G_SPOTS::gspots_land_mission_written)
+    if (nav_cmd_id == MAV_CMD_NAV_LOITER_TIME && !ModeAUTOLAND_G_SPOTS::gspot_land_mission_written)
     {
         // Get wind info
-        double gspot_wind_heading_deg_cw_from_north, gspot_wind_vel_total_mps;
         Vector3f gspot_wind                     = AP::ahrs().wind_estimate();
         gspot_wind_heading_deg_cw_from_north   = degrees(atan2f(-gspot_wind.y, -gspot_wind.x));
         gspot_wind_vel_total_mps               = sqrt(pow(gspot_wind.x, 2) + pow(gspot_wind.y, 2));
         if (gspot_wind_heading_deg_cw_from_north < 0.){gspot_wind_heading_deg_cw_from_north = 360 + gspot_wind_heading_deg_cw_from_north;}
         gcs().send_text(MAV_SEVERITY_INFO, "Wind speed: %f [m/s]; Wind direction: %f [deg] from north cw", gspot_wind_vel_total_mps, gspot_wind_heading_deg_cw_from_north);
 
+        // Set land flap percentage
+        double gspot_wind_head_total = fabs(cos(radians(fabs(gspot_wind_heading_deg_cw_from_north - degrees(plane.initial_armed_bearing)))))*gspot_wind_vel_total_mps;
+        double gspot_land_wind_max   = 12.8;
+        if (gspot_wind_head_total <= gspot_land_wind_max)
+        {gspot_land_flap_percent = fabs(((gspot_wind_head_total/gspot_land_wind_max)*100)-100);} // approach direction does not matter, using abs(cos(...)) for that
+        else {gspot_land_flap_percent = 0;}
+        gcs().send_text(MAV_SEVERITY_INFO, "Landing headwind vel: %f [m/s], Flap set at: %i [perc]", gspot_wind_head_total, gspot_land_flap_percent);
         
         // Define approach waypoint location by distance and heading from touchdownpoint
         const int32_t   gspot_WP2_alt              = 3000;                          // [cm] WP2 altidude
@@ -178,7 +184,7 @@ void ModeAUTOLAND_G_SPOTS::update()
         // // Felicidades, aquí está el rhinoceronte ;)
         // else {gcs().send_text(MAV_SEVERITY_INFO, "WP1 sending ERROR");} 
 
-        ModeAUTOLAND_G_SPOTS::gspots_land_mission_written = true;
+        ModeAUTOLAND_G_SPOTS::gspot_land_mission_written = true;
     }
 
     /* 
