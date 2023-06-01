@@ -738,6 +738,47 @@ const AP_Param::Info Plane::var_info[] = {
     // @User: Advanced
     ASCALAR(crash_detection_enable,         "CRASH_DETECT",   0),
 
+    // @Param: LANDA_APPR_ALT
+    // @DisplayName: Autoland Approach Altitude
+    // @Description: Altitude in [m] above home at which the final landing approach will be started (similar to altitude of a final waypoint before the land point in an automission).
+    // @Range: 10 100
+    // @Increment: 1
+    // @User: Advanced
+    GSCALAR(landa_appr_alt,    "LANDA_APPR_ALT",     LANDA_APPR_ALT_DEFAULT),
+
+    // @Param: LANDA_APPR_DIST
+    // @DisplayName: Autoland Approach Distance
+    // @Description: Horizontal distance in [m] from home at which the final landing approach will be started.
+    // @Range: 30 1000
+    // @Increment: 1
+    // @User: Advanced
+    GSCALAR(landa_appr_dist,    "LANDA_APPR_DIST",     LANDA_APPR_DIST_DEFAULT),   
+     
+    // @Param: LANDA_FLAPMAXWND
+    // @DisplayName: Autoland Flap Max Wind
+    // @Description: Headwind velocity in [m/s] beyond which 0% flaps will be deployed. The flap deflection will be scaled from 0-100% for headwinds from LANDA_FLAPWNDMAX down to 0 [m/s] headwind. EG. if LANDA_FLAPWNDMAX=10[m/s] and a headwind of 5[m/s], 50% flaps will be deployed during the final landing approach. A good starting point is just above your cruise speed.
+    // @Range: 0 200
+    // @Increment: 0.1
+    // @User: Advanced
+    GSCALAR(landa_flapmaxwnd,    "LANDA_FLAPMAXWND",     LANDA_FLAPMAXWND_DEFAULT),
+
+    // @Param: LANDA_LOITERTIME
+    // @DisplayName: Autoland RTL Loiter time
+    // @Description: Time in [s] to loiter at RTL altitude above home. The time is used to measure the local wind direction and speed to calculate the approach direction and flap settings.
+    // @Range: 1 20
+    // @Increment: 1
+    // @User: Advanced
+    GSCALAR(landa_loitertime,    "LANDA_LOITERTIME",     LANDA_LOITERTIME_DEFAULT),
+
+    // @Param: LANDA_WND_MARGIN
+    // @DisplayName: Autoland Wind Heading Margin
+    // @Description: Margin in [degrees] of how many degrees the wind may blow from the back in favor of using the same approach path as has been taken during takeoff. A setting of LANDA_WNDMARGIN=5[deg] will thus allow the wind to blow from +/-95[deg] as seen from the aircraft with the nose pointing towards 0[deg]. If set to 90[deg] the aircraft will always use the same flightpath as during takeoff, regardless of where the wind is coming from. Alternatively negative numbers are allowed - reversing the previous logic and thus favouring the 'non-takoff' flightpath.
+    // @Range: -90 90
+    // @Increment: 1
+    // @User: Advanced
+    GSCALAR(landa_wnd_margin,    "LANDA_WND_MARGIN",     LANDA_WND_MARGIN_DEFAULT),
+
+
     // @Group: BARO
     // @Path: ../libraries/AP_Baro/AP_Baro.cpp
     GOBJECT(barometer, "BARO", AP_Baro),

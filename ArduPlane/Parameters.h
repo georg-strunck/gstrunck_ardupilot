@@ -4,9 +4,9 @@
 
 // Global parameter class.
 //
-class Parameters {
+class Parameters
+{
 public:
-
     /*
      *  The value of k_format_version determines whether the existing
      *  eeprom data is considered valid. You should only change this
@@ -34,8 +34,8 @@ public:
     static const uint16_t k_format_version = 13;
     //////////////////////////////////////////////////////////////////
 
-
-    enum {
+    enum
+    {
         // Layout version number, always key zero.
         //
         k_param_format_version = 0,
@@ -51,11 +51,11 @@ public:
 
         // Misc
         //
-        k_param_auto_trim      = 10, // unused
-        k_param_log_bitmask_old,  // unused
+        k_param_auto_trim = 10,  // unused
+        k_param_log_bitmask_old, // unused
         k_param_pitch_trim_cd,
         k_param_mix_mode,
-        k_param_reverse_elevons, // unused
+        k_param_reverse_elevons,    // unused
         k_param_reverse_ch1_elevon, // unused
         k_param_reverse_ch2_elevon, // unused
         k_param_flap_1_percent,
@@ -63,50 +63,50 @@ public:
         k_param_flap_2_percent,
         k_param_flap_2_speed,
         k_param_reset_switch_chan, // unused - moved to RC option
-        k_param_manual_level, // unused
-        k_param_land_pitch_cd,  // unused - moved to AP_Landing
-        k_param_ins_old,            // *** Deprecated, remove with next eeprom number change
+        k_param_manual_level,      // unused
+        k_param_land_pitch_cd,     // unused - moved to AP_Landing
+        k_param_ins_old,           // *** Deprecated, remove with next eeprom number change
         k_param_stick_mixing,
-        k_param_reset_mission_chan, // unused - moved to RC option
-        k_param_land_flare_alt, // unused - moved to AP_Landing
-        k_param_land_flare_sec, // unused - moved to AP_Landing
+        k_param_reset_mission_chan,      // unused - moved to RC option
+        k_param_land_flare_alt,          // unused - moved to AP_Landing
+        k_param_land_flare_sec,          // unused - moved to AP_Landing
         k_param_crosstrack_min_distance, // unused
-        k_param_rudder_steer, // unused
+        k_param_rudder_steer,            // unused
         k_param_throttle_nudge,
         k_param_alt_offset,
-        k_param_ins,                // libraries/AP_InertialSensor variables
+        k_param_ins, // libraries/AP_InertialSensor variables
         k_param_takeoff_throttle_min_speed,
         k_param_takeoff_throttle_min_accel,
         k_param_takeoff_heading_hold, // unused
         k_param_level_roll_limit,
-        k_param_hil_servos_unused,  // unused
-        k_param_vtail_output, // unused
-        k_param_nav_controller, // unused
-        k_param_elevon_output, // unused
-        k_param_att_controller, // unused
+        k_param_hil_servos_unused, // unused
+        k_param_vtail_output,      // unused
+        k_param_nav_controller,    // unused
+        k_param_elevon_output,     // unused
+        k_param_att_controller,    // unused
         k_param_mixing_gain,
         k_param_scheduler,
         k_param_relay,
         k_param_takeoff_throttle_delay,
-        k_param_mode_takeoff, // was skip_gyro_cal
+        k_param_mode_takeoff,   // was skip_gyro_cal
         k_param_auto_fbw_steer, // unused
         k_param_waypoint_max_radius,
-        k_param_ground_steer_alt,        
+        k_param_ground_steer_alt,
         k_param_ground_steer_dps,
-        k_param_rally_limit_km_old, //unused anymore -- just holding this index
-        k_param_hil_err_limit_unused,  // unused
-        k_param_sonar_old, // unused
+        k_param_rally_limit_km_old,   // unused anymore -- just holding this index
+        k_param_hil_err_limit_unused, // unused
+        k_param_sonar_old,            // unused
         k_param_log_bitmask,
         k_param_BoardConfig,
-        k_param_rssi_range,     // unused, replaced by rssi_ library parameters
-        k_param_flapin_channel_old,  // unused, moved to RC_OPTION
-        k_param_flaperon_output, // unused
+        k_param_rssi_range,         // unused, replaced by rssi_ library parameters
+        k_param_flapin_channel_old, // unused, moved to RC_OPTION
+        k_param_flaperon_output,    // unused
         k_param_gps,
         k_param_autotune_level,
         k_param_rally,
-        k_param_serial0_baud,           // deprecated
-        k_param_serial1_baud,           // deprecated
-        k_param_serial2_baud,           // deprecated
+        k_param_serial0_baud, // deprecated
+        k_param_serial1_baud, // deprecated
+        k_param_serial2_baud, // deprecated
         k_param_takeoff_tdrag_elevator,
         k_param_takeoff_tdrag_speed1,
         k_param_takeoff_rotate_speed,
@@ -121,20 +121,20 @@ public:
         k_param_terrain_lookahead,
         k_param_fbwa_tdrag_chan, // unused - moved to RC option
         k_param_rangefinder_landing,
-        k_param_land_flap_percent,  // unused - moved to AP_Landing
+        k_param_land_flap_percent, // unused - moved to AP_Landing
         k_param_takeoff_flap_percent,
         k_param_flap_slewrate,
         k_param_rtl_autoland,
         k_param_override_channel,
         k_param_stall_prevention,
         k_param_optflow,
-        k_param_cli_enabled_old, // unused - CLI removed
-        k_param_trim_rc_at_start, // unused
-        k_param_hil_mode_unused,  // unused
-        k_param_land_disarm_delay,  // unused - moved to AP_Landing
+        k_param_cli_enabled_old,   // unused - CLI removed
+        k_param_trim_rc_at_start,  // unused
+        k_param_hil_mode_unused,   // unused
+        k_param_land_disarm_delay, // unused - moved to AP_Landing
         k_param_glide_slope_threshold,
         k_param_rudder_only,
-        k_param_gcs3,            // 93
+        k_param_gcs3, // 93
         k_param_gcs_pid_mask,
         k_param_crash_detection_enable,
         k_param_land_abort_throttle_enable, // unused - moved to AP_Landing
@@ -144,7 +144,7 @@ public:
         k_param_arming = 100,
         k_param_parachute_channel, // unused - moved to RC option
         k_param_crash_accel_threshold,
-        k_param_override_safety, // unused
+        k_param_override_safety,        // unused
         k_param_land_throttle_slewrate, // 104 unused - moved to AP_Landing
 
         // 105: Extra parameters
@@ -156,22 +156,22 @@ public:
 
         // 110: Telemetry control
         //
-        k_param_gcs0 = 110,         // stream rates for uartA
-        k_param_gcs1,               // stream rates for uartC
+        k_param_gcs0 = 110, // stream rates for uartA
+        k_param_gcs1,       // stream rates for uartC
         k_param_sysid_this_mav,
         k_param_sysid_my_gcs,
-        k_param_serial1_baud_old,   // deprecated
+        k_param_serial1_baud_old, // deprecated
         k_param_telem_delay,
-        k_param_serial0_baud_old,   // deprecated
-        k_param_gcs2,               // stream rates for uartD
-        k_param_serial2_baud_old,   // deprecated
-        k_param_serial2_protocol,   // deprecated
+        k_param_serial0_baud_old, // deprecated
+        k_param_gcs2,             // stream rates for uartD
+        k_param_serial2_baud_old, // deprecated
+        k_param_serial2_protocol, // deprecated
 
         // 120: Fly-by-wire control
         //
         k_param_airspeed_min = 120,
         k_param_airspeed_max,
-        k_param_FBWB_min_altitude_cm,  // 0=disabled, minimum value for altitude in cm (for first time try 30 meters = 3000 cm)
+        k_param_FBWB_min_altitude_cm, // 0=disabled, minimum value for altitude in cm (for first time try 30 meters = 3000 cm)
         k_param_flybywire_elev_reverse,
         k_param_alt_control_algorithm, // unused
         k_param_flybywire_climb_rate,
@@ -183,7 +183,7 @@ public:
         //
         // 130: Sensor parameters
         //
-        k_param_imu = 130,  // unused
+        k_param_imu = 130,    // unused
         k_param_altitude_mix, // deprecated
 
         k_param_compass_enabled_deprecated,
@@ -191,24 +191,24 @@ public:
         k_param_battery_monitoring, // unused
         k_param_volt_div_ratio,     // unused
         k_param_curr_amp_per_volt,  // unused
-        k_param_input_voltage, // deprecated, can be deleted
+        k_param_input_voltage,      // deprecated, can be deleted
         k_param_pack_capacity,      // unused
         k_param_sonar_enabled_old,  // unused
-        k_param_ahrs,  // AHRS group
-        k_param_barometer,   // barometer ground calibration
+        k_param_ahrs,               // AHRS group
+        k_param_barometer,          // barometer ground calibration
         k_param_airspeed,           // only used for parameter conversion; AP_Airspeed parameters moved to AP_Vehicle
         k_param_curr_amp_offset,
-        k_param_NavEKF,  // deprecated - remove
-        k_param_mission, // mission library
-        k_param_serial_manager, // serial manager library
-        k_param_NavEKF2_old,  // deprecated - remove
-        k_param_land_pre_flare_alt, // unused - moved to AP_Landing
-        k_param_land_pre_flare_airspeed = 149,  // unused - moved to AP_Landing
+        k_param_NavEKF,                        // deprecated - remove
+        k_param_mission,                       // mission library
+        k_param_serial_manager,                // serial manager library
+        k_param_NavEKF2_old,                   // deprecated - remove
+        k_param_land_pre_flare_alt,            // unused - moved to AP_Landing
+        k_param_land_pre_flare_airspeed = 149, // unused - moved to AP_Landing
 
         //
         // 150: Navigation parameters
         //
-        k_param_crosstrack_gain = 150, // unused
+        k_param_crosstrack_gain = 150,  // unused
         k_param_crosstrack_entry_angle, // unused
         k_param_roll_limit_cd,
         k_param_pitch_limit_max_cd,
@@ -219,24 +219,23 @@ public:
         k_param_min_gndspeed_cm,
         k_param_crosstrack_use_wind, // unused
 
-
         //
         // Camera and mount parameters
         //
         k_param_camera = 160,
         k_param_camera_mount,
-        k_param_camera_mount2,      // unused
+        k_param_camera_mount2, // unused
         k_param_adsb,
         k_param_notify,
-        k_param_land_pre_flare_sec = 165,   // unused - moved to AP_Landing
+        k_param_land_pre_flare_sec = 165, // unused - moved to AP_Landing
 
         //
         // Battery monitoring parameters
         //
         k_param_battery = 166,
-        k_param_rssi_pin,               // unused, replaced by rssi_ library parameters - 167
-        k_param_battery_volt_pin,       // unused - 168
-        k_param_battery_curr_pin,       // unused - 169
+        k_param_rssi_pin,         // unused, replaced by rssi_ library parameters - 167
+        k_param_battery_volt_pin, // unused - 168
+        k_param_battery_curr_pin, // unused - 169
 
         //
         // 170: Radio settings - all unused now
@@ -284,7 +283,7 @@ public:
         k_param_scaling_speed,
         k_param_quadplane,
         k_param_rtl_radius,
-        k_param_land_then_servos_neutral,   // unused - moved to AP_Landing
+        k_param_land_then_servos_neutral, // unused - moved to AP_Landing
         k_param_rc_15_old,
         k_param_rc_16_old,
 
@@ -299,15 +298,15 @@ public:
         k_param_flight_mode5,
         k_param_flight_mode6,
         k_param_initial_mode,
-        k_param_land_slope_recalc_shallow_threshold,    // unused - moved to AP_Landing
+        k_param_land_slope_recalc_shallow_threshold,        // unused - moved to AP_Landing
         k_param_land_slope_recalc_steep_threshold_to_abort, // unused - moved to AP_Landing
 
         //
         // 220: Waypoint data
         //
         k_param_waypoint_mode = 220, // unused
-        k_param_command_total,  // unused
-        k_param_command_index,  // unused
+        k_param_command_total,       // unused
+        k_param_command_index,       // unused
         k_param_waypoint_radius,
         k_param_loiter_radius,
         k_param_fence_action,
@@ -325,19 +324,19 @@ public:
         k_param_L1_controller,
         k_param_rcmap,
         k_param_TECS_controller,
-        k_param_rally_total_old,  //unused
+        k_param_rally_total_old, // unused
         k_param_steerController,
 
         //
         // 240: PID Controllers
-        k_param_pidNavRoll = 240, // unused
-        k_param_pidServoRoll, // unused
-        k_param_pidServoPitch, // unused
+        k_param_pidNavRoll = 240,    // unused
+        k_param_pidServoRoll,        // unused
+        k_param_pidServoPitch,       // unused
         k_param_pidNavPitchAirspeed, // unused
-        k_param_pidServoRudder, // unused
-        k_param_pidTeThrottle, // unused
+        k_param_pidServoRudder,      // unused
+        k_param_pidTeThrottle,       // unused
         k_param_pidNavPitchAltitude, // unused
-        k_param_pidWheelSteer, // unused
+        k_param_pidWheelSteer,       // unused
 
         k_param_mixing_offset,
         k_param_dspoiler_rud_rate,
@@ -352,6 +351,15 @@ public:
         k_param_gcs6,          // stream rates
         k_param_fence,         // vehicle fence - unused
         k_param_acro_yaw_rate,
+
+        // 263, 264 free
+
+        // 265: Autolanding
+        k_param_landa_appr_alt = 265,   // Autoland approach altitude
+        k_param_landa_appr_dist,        // Autoland approach distance
+        k_param_landa_flapmaxwnd,       // Autoland max wind velocity for flap deployment
+        k_param_landa_loitertime,       // Autoland rtl loiter time for measurements
+        k_param_landa_wnd_margin = 269, // Autoland wind heading margin
     };
 
     AP_Int16 format_version;
@@ -364,7 +372,7 @@ public:
 
     AP_Enum<RtlAutoland> rtl_autoland;
 
-    AP_Int8  crash_accel_threshold;
+    AP_Int8 crash_accel_threshold;
 
     // Feed-forward gains
     //
@@ -422,7 +430,7 @@ public:
     AP_Int16 acro_roll_rate;
     AP_Int16 acro_pitch_rate;
     AP_Int16 acro_yaw_rate;
-    AP_Int8  acro_locking;
+    AP_Int8 acro_locking;
 
     // Misc
     //
@@ -440,7 +448,7 @@ public:
     AP_Int8 flap_1_speed;
     AP_Int8 flap_2_percent;
     AP_Int8 flap_2_speed;
-    AP_Int8 takeoff_flap_percent;  
+    AP_Int8 takeoff_flap_percent;
     AP_Enum<StickMixing> stick_mixing;
     AP_Float takeoff_throttle_min_speed;
     AP_Float takeoff_throttle_min_accel;
@@ -463,12 +471,18 @@ public:
     AP_Int8 override_channel;
 #endif
     AP_Int16 gcs_pid_mask;
+    AP_Int8 landa_appr_alt;
+	AP_Int16 landa_appr_dist;
+	AP_Float landa_flapmaxwnd;
+	AP_Int8 landa_loitertime;
+	AP_Int8 landa_wnd_margin;
 };
 
 /*
   2nd block of parameters, to avoid going past 256 top level keys
  */
-class ParametersG2 {
+class ParametersG2
+{
 public:
     ParametersG2(void);
 
@@ -492,7 +506,7 @@ public:
 
     // RC input channels
     RC_Channels_Plane rc_channels;
-    
+
     // control over servo output ranges
     SRV_Channels servo_channels;
 
@@ -540,27 +554,27 @@ public:
     // Forward throttle battery voltage compenstaion
     AP_Float fwd_thr_batt_voltage_max;
     AP_Float fwd_thr_batt_voltage_min;
-    AP_Int8  fwd_thr_batt_idx;
+    AP_Int8 fwd_thr_batt_idx;
 
 #if OFFBOARD_GUIDED == ENABLED
     // guided yaw heading PID
-    AC_PID guidedHeading{5000.0,  0.0,   0.0, 0 ,  10.0,   5.0,  5.0 ,  5.0  , 0.2};
+    AC_PID guidedHeading{5000.0, 0.0, 0.0, 0, 10.0, 5.0, 5.0, 5.0, 0.2};
 #endif
 
 #if AP_SCRIPTING_ENABLED
     AP_Follow follow;
 #endif
 
-    AP_Float        fs_ekf_thresh;
+    AP_Float fs_ekf_thresh;
 
     // min initial climb in RTL
-    AP_Int16        rtl_climb_min;
+    AP_Int16 rtl_climb_min;
 
-    AP_Int8         man_expo_roll;
-    AP_Int8         man_expo_pitch;
-    AP_Int8         man_expo_rudder;
+    AP_Int8 man_expo_roll;
+    AP_Int8 man_expo_pitch;
+    AP_Int8 man_expo_rudder;
 
-    AP_Int32        oneshot_mask;
+    AP_Int32 oneshot_mask;
 
     // just to make compilation easier when all things are compiled out...
     uint8_t unused_integer;

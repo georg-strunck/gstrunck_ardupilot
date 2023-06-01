@@ -278,3 +278,28 @@
 #ifndef THR_CTRL_LAND_THRESH
  #define THR_CTRL_LAND_THRESH 0.7
 #endif
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Autoland parameter defaults
+/////////////////////////////////////////////////////////////////////////////
+//  Autoland Approach Altitude
+#ifndef LANDA_APPR_ALT_DEFAULT
+ #define LANDA_APPR_ALT_DEFAULT 30
+#endif
+//  Autoland Approach Distance
+#ifndef LANDA_APPR_DIST_DEFAULT
+ #define LANDA_APPR_DIST_DEFAULT 300
+#endif
+//  Autoland Flap Max Wind
+#ifndef LANDA_FLAPMAXWND_DEFAULT
+ #define LANDA_FLAPMAXWND_DEFAULT 12.8
+#endif
+//  Autoland RTL Loiter time
+#ifndef LANDA_LOITERTIME_DEFAULT
+ #define LANDA_LOITERTIME_DEFAULT 10
+#endif
+//  Autoland Wind Heading Margin
+#ifndef LANDA_WND_MARGIN_DEFAULT
+ #define LANDA_WND_MARGIN_DEFAULT 5
+#endif
