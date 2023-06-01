@@ -81,7 +81,7 @@
  # define FLIGHT_MODE_5                  Mode::Number::MANUAL
 #endif
 #if !defined(FLIGHT_MODE_6)
- # define FLIGHT_MODE_6                  Mode::Number::MANUAL
+ # define FLIGHT_MODE_6                  Mode::Number::AUTOLAND_G_SPOTS
 #endif
 
 
