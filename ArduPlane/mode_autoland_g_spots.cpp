@@ -1,7 +1,7 @@
 #include "mode.h"
 #include "Plane.h"
 #include <cmath>
-
+#include <algorithm>
 
 bool ModeAUTOLAND_G_SPOTS::_enter()
 {
@@ -47,12 +47,6 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
     gspot_cmd_WPinf.id = MAV_CMD_NAV_WAYPOINT;
     gspot_cmd_WPinf.content.location = gspot_loc_WP5;
     plane.mission.add_cmd(gspot_cmd_WPinf);
-
-    // Add RTL WP5
-    // AP_Mission::Mission_Command gspot_cmd_WP5;
-    // gspot_cmd_WP5.id = MAV_CMD_NAV_WAYPOINT;
-    // gspot_cmd_WP5.content.location = gspot_loc_WP5;
-    // plane.mission.add_cmd(gspot_cmd_WP5);
 
     // Add loiter time WP4
     AP_Mission::Mission_Command gspot_cmd_WP4;
@@ -138,7 +132,7 @@ void ModeAUTOLAND_G_SPOTS::update()
         double gspot_wind_head_total = fabs(cos(radians(fabs(gspot_wind_heading_deg_cw_from_north - degrees(plane.initial_armed_bearing)))))*gspot_wind_vel_total_mps;
         float  gspot_land_wind_max   = plane.g.landa_flapmaxwnd;
         if (gspot_wind_head_total < gspot_land_wind_max)
-        {gspot_land_flap_percent = fabs(((gspot_wind_head_total/gspot_land_wind_max)*100)-100);} // approach direction does not matter, using abs(cos(...)) for that
+        {gspot_land_flap_percent = fabs(((std::min(gspot_wind_head_total, std::max(0., (gspot_wind_head_total-2)))/(gspot_land_wind_max-2))*100)-100);} // approach direction does not matter, using abs(cos(...)) for that
         else {gspot_land_flap_percent = 0;}
         gcs().send_text(MAV_SEVERITY_INFO, "Landing headwind vel: %f [m/s], Flap set at: %i [perc]", gspot_wind_head_total, gspot_land_flap_percent);
         
