@@ -779,6 +779,12 @@ void Plane::set_servos_flaps(void)
                 if (plane.mode_autolandgspots.gspot_land_mission_written)
                 {
                     auto_flap_percent = plane.mode_autolandgspots.gspot_land_flap_percent;
+                    static bool gspot_runonce_flap_msg = true;
+                    if (gspot_runonce_flap_msg)
+                    {
+                        gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: Flaps will be deployed now at %i [perc]", auto_flap_percent);
+                        gspot_runonce_flap_msg = false;
+                    }
                 }
                 
             }

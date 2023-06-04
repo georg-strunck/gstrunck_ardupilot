@@ -31,7 +31,7 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
     */
    // Get home point (location where the plane was ARMed! (not turned on or safety switch))
     Location gspot_loc_home{ AP::ahrs().get_home() };
-    // gcs().send_text(MAV_SEVERITY_INFO, "Home location at: %f Latitude, %f Longitude, %f Altitude", gspot_loc_home.lat* 1.0e-7, gspot_loc_home.lng* 1.0e-7, gspot_loc_home.alt* 1.0e-2);
+    gcs().send_text(MAV_SEVERITY_INFO, "Home location at: %f Latitude, %f Longitude, %f Altitude", gspot_loc_home.lat* 1.0e-7, gspot_loc_home.lng* 1.0e-7, gspot_loc_home.alt* 1.0e-2);
     const int32_t   gspot_WP5_alt = plane.get_RTL_altitude_cm() - gspot_loc_home.alt;    // [cm] WP5 altidude is equal to rtl alt (ALT_HOLD_RTL parameter)
     Location        gspot_loc_WP5 {gspot_loc_home.lat, gspot_loc_home.lng, gspot_WP5_alt, Location::AltFrame::ABOVE_HOME}; // Location object WP5_alt above home, used for dummy WPinf, WP5 and WP4
     
@@ -49,10 +49,10 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
     plane.mission.add_cmd(gspot_cmd_WPinf);
 
     // Add RTL WP5
-    AP_Mission::Mission_Command gspot_cmd_WP5;
-    gspot_cmd_WP5.id = MAV_CMD_NAV_WAYPOINT;
-    gspot_cmd_WP5.content.location = gspot_loc_WP5;
-    plane.mission.add_cmd(gspot_cmd_WP5);
+    // AP_Mission::Mission_Command gspot_cmd_WP5;
+    // gspot_cmd_WP5.id = MAV_CMD_NAV_WAYPOINT;
+    // gspot_cmd_WP5.content.location = gspot_loc_WP5;
+    // plane.mission.add_cmd(gspot_cmd_WP5);
 
     // Add loiter time WP4
     AP_Mission::Mission_Command gspot_cmd_WP4;
@@ -62,7 +62,7 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
     plane.mission.add_cmd(gspot_cmd_WP4);
 
     // Set bool for next waypoints (see update)
-    ModeAUTOLAND_G_SPOTS::gspot_land_mission_written = false;
+    gspot_land_mission_written = false;
     
     plane.next_WP_loc = plane.prev_WP_loc = plane.current_loc;
     // start or resume the mission, based on MIS_AUTORESET
@@ -125,7 +125,7 @@ void ModeAUTOLAND_G_SPOTS::update()
     ____________ START: Create land mission waypoints based on windspeed ______________
     */ 
 
-    if (nav_cmd_id == MAV_CMD_NAV_LOITER_TIME && !ModeAUTOLAND_G_SPOTS::gspot_land_mission_written)
+    if (nav_cmd_id == MAV_CMD_NAV_LOITER_TIME && !gspot_land_mission_written)
     {
         // Get wind info
         Vector3f gspot_wind                     = AP::ahrs().wind_estimate();
@@ -184,7 +184,7 @@ void ModeAUTOLAND_G_SPOTS::update()
         // // Felicidades, aquí está el rhinoceronte ;)
         // else {gcs().send_text(MAV_SEVERITY_INFO, "WP1 sending ERROR");} 
 
-        ModeAUTOLAND_G_SPOTS::gspot_land_mission_written = true;
+        gspot_land_mission_written = true;
     }
 
     /* 
@@ -197,7 +197,13 @@ void ModeAUTOLAND_G_SPOTS::update()
         plane.takeoff_calc_pitch();
         plane.calc_throttle();
     } else if (nav_cmd_id == MAV_CMD_NAV_LAND) {
-        gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: Auto landing on the GSPOT");
+        static bool gspot_runonce_lnd_msg = true;
+        if (gspot_runonce_lnd_msg)
+        {
+            gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: Auto landing on the GSPOT");
+            gspot_runonce_lnd_msg = false;
+        }
+        
         plane.calc_nav_roll();
         plane.calc_nav_pitch();
 

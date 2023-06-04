@@ -195,7 +195,6 @@ public:
     double  gspot_wind_heading_deg_cw_from_north, gspot_wind_vel_total_mps;
     bool    gspot_land_mission_written;
     int8_t  gspot_land_flap_percent;
-    bool    gspot_land_flap_deploy;
 
     bool does_automatic_thermal_switch() const override { return true; }
 
