@@ -756,11 +756,19 @@ const AP_Param::Info Plane::var_info[] = {
      
     // @Param: LANDA_FLAPMAXWND
     // @DisplayName: Autoland Flap Max Wind
-    // @Description: Headwind velocity in [m/s] beyond which 0% flaps will be deployed. The flap deflection will be scaled from 0-100% for headwinds from LANDA_FLAPWNDMAX down to 0 [m/s] headwind. EG. if LANDA_FLAPWNDMAX=10[m/s] and a headwind of 5[m/s], 50% flaps will be deployed during the final landing approach. A good starting point is just above your cruise speed.
+    // @Description: Headwind velocity in [m/s] beyond which 0% flaps will be deployed. The flap deflection will be scaled from 0-100% for headwinds from LANDA_FLAPMINWND down to LANDA_FLAPMINWND [m/s] headwind. EG. if LANDA_FLAPMINWND=10[m/s], LANDA_FLAPMINWND=2[m/s] and a headwind of 6[m/s], 50% flaps will be deployed during the final landing approach. A good starting point is just above your cruise speed.
     // @Range: 0 200
     // @Increment: 0.1
     // @User: Advanced
     GSCALAR(landa_flapmaxwnd,    "LANDA_FLAPMAXWND",     LANDA_FLAPMAXWND_DEFAULT),
+
+    // @Param: LANDA_FLAPMINWND
+    // @DisplayName: Autoland Flap Min Wind
+    // @Description: Headwind velocity in [m/s] below which 100% flaps will be deployed. The flap deflection will be scaled from 0-100% for headwinds from LANDA_FLAPMINWND down to LANDA_FLAPMINWND [m/s] headwind. EG. if LANDA_FLAPMINWND=10[m/s], LANDA_FLAPMINWND=2[m/s] and a headwind of 6[m/s], 50% flaps will be deployed during the final landing approach.
+    // @Range: 0 200
+    // @Increment: 0.1
+    // @User: Advanced
+    GSCALAR(landa_flapminwnd,    "LANDA_FLAPMINWND",     LANDA_FLAPMINWND_DEFAULT),
 
     // @Param: LANDA_LOITERTIME
     // @DisplayName: Autoland RTL Loiter time

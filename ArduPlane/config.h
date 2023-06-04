@@ -295,6 +295,10 @@
 #ifndef LANDA_FLAPMAXWND_DEFAULT
  #define LANDA_FLAPMAXWND_DEFAULT 12.8
 #endif
+//  Autoland Flap Min Wind
+#ifndef LANDA_FLAPMINWND_DEFAULT
+ #define LANDA_FLAPMINWND_DEFAULT 1.5
+#endif
 //  Autoland RTL Loiter time
 #ifndef LANDA_LOITERTIME_DEFAULT
  #define LANDA_LOITERTIME_DEFAULT 10
