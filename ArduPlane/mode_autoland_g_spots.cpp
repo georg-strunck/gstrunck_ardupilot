@@ -32,8 +32,8 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
    // Get home point (location where the plane was ARMed! (not turned on or safety switch))
     Location gspot_loc_home{ AP::ahrs().get_home() };
     // gcs().send_text(MAV_SEVERITY_INFO, "Home location at: %f Latitude, %f Longitude, %f Altitude", gspot_loc_home.lat* 1.0e-7, gspot_loc_home.lng* 1.0e-7, gspot_loc_home.alt* 1.0e-2);
-    const int32_t   gspot_WP5_alt = plane.get_RTL_altitude_cm();    // [cm] WP5 altidude is equal to rtl alt (ALT_HOLD_RTL parameter)
-    Location        gspot_loc_WP5 {gspot_loc_home.lat, gspot_loc_home.lng, gspot_WP5_alt, Location::AltFrame::ABSOLUTE}; // Location object WP5_alt above home, used for dummy WPinf, WP5 and WP4
+    const int32_t   gspot_WP5_alt = plane.get_RTL_altitude_cm() - gspot_loc_home.alt;    // [cm] WP5 altidude is equal to rtl alt (ALT_HOLD_RTL parameter)
+    Location        gspot_loc_WP5 {gspot_loc_home.lat, gspot_loc_home.lng, gspot_WP5_alt, Location::AltFrame::ABOVE_HOME}; // Location object WP5_alt above home, used for dummy WPinf, WP5 and WP4
     
     /* 
     ________________ Mission functions found in AP_Mission.h/.cpp _______________________
