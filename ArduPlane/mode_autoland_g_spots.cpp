@@ -55,6 +55,12 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
     gspot_cmd_WP4.content.location = gspot_loc_WP5;
     plane.mission.add_cmd(gspot_cmd_WP4);
 
+    // Add RTL WP5
+    AP_Mission::Mission_Command gspot_cmd_WP5;
+    gspot_cmd_WP5.id = MAV_CMD_NAV_WAYPOINT;
+    gspot_cmd_WP5.content.location = gspot_loc_WP5;
+    plane.mission.add_cmd(gspot_cmd_WP5);
+
     // Set bool for next waypoints (see update)
     gspot_land_mission_written = false;
     
@@ -80,6 +86,7 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
 void ModeAUTOLAND_G_SPOTS::_exit()
 {
     gcs().send_text(MAV_SEVERITY_INFO,"GSPOT: EXITing GSPOTs mode");
+    gspot_land_mission_written = false;
     if (plane.mission.state() == AP_Mission::MISSION_RUNNING) {
         plane.mission.stop();
 
@@ -119,7 +126,7 @@ void ModeAUTOLAND_G_SPOTS::update()
     ____________ START: Create land mission waypoints based on windspeed ______________
     */ 
 
-    if (nav_cmd_id == MAV_CMD_NAV_LOITER_TIME && !gspot_land_mission_written)
+    if (nav_cmd_id == MAV_CMD_NAV_WAYPOINT && !gspot_land_mission_written)
     {
         // Get wind info
         Vector3f gspot_wind                     = AP::ahrs().wind_estimate();
@@ -129,10 +136,10 @@ void ModeAUTOLAND_G_SPOTS::update()
         gcs().send_text(MAV_SEVERITY_INFO, "Wind speed: %f [m/s]; Wind direction: %f [deg] from north cw", gspot_wind_vel_total_mps, gspot_wind_heading_deg_cw_from_north);
 
         // Set land flap percentage
-        double gspot_wind_head_total = fabs(cos(radians(fabs(gspot_wind_heading_deg_cw_from_north - degrees(plane.initial_armed_bearing)))))*gspot_wind_vel_total_mps;
-        float  gspot_land_wind_max   = plane.g.landa_flapmaxwnd;
+        float gspot_wind_head_total = fabs(cos(radians(fabs(gspot_wind_heading_deg_cw_from_north - degrees(plane.initial_armed_bearing)))))*gspot_wind_vel_total_mps;
+        float gspot_land_wind_max   = plane.g.landa_flapmaxwnd;
         if (gspot_wind_head_total < gspot_land_wind_max)
-        {gspot_land_flap_percent = fabs(((std::min(gspot_wind_head_total, std::max(0., (gspot_wind_head_total-plane.g.landa_flapminwnd)))/(gspot_land_wind_max-plane.g.landa_flapminwnd))*100)-100);} // approach direction does not matter, using abs(cos(...)) for that
+        {gspot_land_flap_percent = fabs(((std::min(gspot_wind_head_total, std::max(float(0), (gspot_wind_head_total-plane.g.landa_flapminwnd)))/(gspot_land_wind_max-plane.g.landa_flapminwnd))*100)-100);} // approach direction does not matter, using abs(cos(...)) for that
         else {gspot_land_flap_percent = 0;}
         gcs().send_text(MAV_SEVERITY_INFO, "Landing headwind vel: %f [m/s], Flap set at: %i [perc]", gspot_wind_head_total, gspot_land_flap_percent);
         
