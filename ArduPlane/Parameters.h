@@ -357,10 +357,13 @@ public:
         // 265: Autolanding
         k_param_landa_appr_alt = 265,   // Autoland approach altitude
         k_param_landa_appr_dist,        // Autoland approach distance
+        k_param_landa_appr_scale,       // Autoland approach distance scaling factor
+        k_param_landa_clout_enbl,       // Autoland enable takeoff climb out heading for landing approach
         k_param_landa_flapmaxwnd,       // Autoland max wind velocity for flap deployment
         k_param_landa_flapminwnd,       // Autoland in wind velocity for less than 100% flap deployment
-        k_param_landa_loitertime,       // Autoland rtl loiter time for measurements
-        k_param_landa_wnd_margin = 270, // Autoland wind heading margin
+        k_param_landa_ltr_time,         // Autoland rtl loiter time for setting approach points
+        k_param_landa_ltr_turns,        // Autoland rtl loiter turns for measurements
+        k_param_landa_wnd_margin = 273, // Autoland wind heading margin
     };
 
     AP_Int16 format_version;
@@ -474,9 +477,12 @@ public:
     AP_Int16 gcs_pid_mask;
     AP_Int8 landa_appr_alt;
 	AP_Int16 landa_appr_dist;
+    AP_Int8 landa_appr_scale;
+    AP_Int8 landa_clout_enbl;
 	AP_Float landa_flapmaxwnd;
 	AP_Float landa_flapminwnd;
-	AP_Int8 landa_loitertime;
+	AP_Int8 landa_ltr_time;
+	AP_Int8 landa_ltr_turns;
 	AP_Int8 landa_wnd_margin;
 };
 

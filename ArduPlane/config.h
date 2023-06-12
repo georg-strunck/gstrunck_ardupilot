@@ -289,19 +289,31 @@
 #endif
 //  Autoland Approach Distance
 #ifndef LANDA_APPR_DIST_DEFAULT
- #define LANDA_APPR_DIST_DEFAULT 300
+ #define LANDA_APPR_DIST_DEFAULT 500
+#endif
+//  Autoland Approach Distance Scaling
+#ifndef LANDA_APPR_SCALE_DEFAULT
+ #define LANDA_APPR_SCALE_DEFAULT 0
+#endif
+//  Autoland Takeoff Climb-out heading use
+#ifndef LANDA_CLOUT_ENBL_DEFAULT
+ #define LANDA_CLOUT_ENBL_DEFAULT 0
 #endif
 //  Autoland Flap Max Wind
 #ifndef LANDA_FLAPMAXWND_DEFAULT
- #define LANDA_FLAPMAXWND_DEFAULT 12.8
+ #define LANDA_FLAPMAXWND_DEFAULT 20
 #endif
 //  Autoland Flap Min Wind
 #ifndef LANDA_FLAPMINWND_DEFAULT
- #define LANDA_FLAPMINWND_DEFAULT 1.5
+ #define LANDA_FLAPMINWND_DEFAULT 5
 #endif
 //  Autoland RTL Loiter time
-#ifndef LANDA_LOITERTIME_DEFAULT
- #define LANDA_LOITERTIME_DEFAULT 10
+#ifndef LANDA_LTR_TIME_DEFAULT
+ #define LANDA_LTR_TIME_DEFAULT 5
+#endif
+//  Autoland RTL Loiter turns
+#ifndef LANDA_LTR_TURNS_DEFAULT
+ #define LANDA_LTR_TURNS_DEFAULT 1
 #endif
 //  Autoland Wind Heading Margin
 #ifndef LANDA_WND_MARGIN_DEFAULT

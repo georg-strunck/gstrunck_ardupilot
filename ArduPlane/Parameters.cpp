@@ -753,6 +753,22 @@ const AP_Param::Info Plane::var_info[] = {
     // @Increment: 1
     // @User: Advanced
     GSCALAR(landa_appr_dist,    "LANDA_APPR_DIST",     LANDA_APPR_DIST_DEFAULT),   
+
+    // @Param: LANDA_APPR_SCALE
+    // @DisplayName: Autoland Approach Distance Scale
+    // @Description: Scaling the approach distance with the headwind. A stronger headwind allows a shorter landing approach. Larger values shorten the approach distance. The approach distance will be calulated as: dist = LANDA_APPR_DIST - (headwind velocity * LANDA_APPR_SCALE), where only positive numbers and distances greater than (LANDA_APPR_DIST/100) will be allowed.
+    // @Range: 0 50
+    // @Increment: 1
+    // @User: Advanced
+    GSCALAR(landa_appr_scale,    "LANDA_APPR_SCALE",     LANDA_APPR_SCALE_DEFAULT),
+
+    // @Param: LANDA_CLOUT_ENBL
+    // @DisplayName: Autoland Enable Climb-out Heading for runway heading
+    // @Description: Enable (1) the use of takeoff climb-out heading for the landing runway/approach heading.
+    // @Range: 0 1
+    // @Increment: 1
+    // @User: Advanced
+    GSCALAR(landa_clout_enbl,    "LANDA_CLOUT_ENBL",     LANDA_CLOUT_ENBL_DEFAULT),
      
     // @Param: LANDA_FLAPMAXWND
     // @DisplayName: Autoland Flap Max Wind
@@ -770,13 +786,21 @@ const AP_Param::Info Plane::var_info[] = {
     // @User: Advanced
     GSCALAR(landa_flapminwnd,    "LANDA_FLAPMINWND",     LANDA_FLAPMINWND_DEFAULT),
 
-    // @Param: LANDA_LOITERTIME
+    // @Param: LANDA_LTR_TIME
     // @DisplayName: Autoland RTL Loiter time
-    // @Description: Time in [s] to loiter at RTL altitude above home. The time is used to measure the local wind direction and speed to calculate the approach direction and flap settings.
-    // @Range: 1 20
+    // @Description: Time in [s] to loiter at RTL altitude above home after LANDA_LTR_TURNS is completed. The land approach waypoints will be set during this phase.
+    // @Range: 1 60
     // @Increment: 1
     // @User: Advanced
-    GSCALAR(landa_loitertime,    "LANDA_LOITERTIME",     LANDA_LOITERTIME_DEFAULT),
+    GSCALAR(landa_ltr_time,    "LANDA_LTR_TIME",     LANDA_LTR_TIME_DEFAULT),
+
+    // @Param: LANDA_LTR_TURNS
+    // @DisplayName: Autoland RTL Loiter Turns
+    // @Description: Number of turns to loiter at RTL altitude above home. The time is used to measure the local wind direction and speed to calculate the approach direction and flap settings.
+    // @Range: 0 20
+    // @Increment: 1
+    // @User: Advanced
+    GSCALAR(landa_ltr_turns,    "LANDA_LTR_TURNS",     LANDA_LTR_TURNS_DEFAULT),
 
     // @Param: LANDA_WND_MARGIN
     // @DisplayName: Autoland Wind Heading Margin
@@ -785,7 +809,6 @@ const AP_Param::Info Plane::var_info[] = {
     // @Increment: 1
     // @User: Advanced
     GSCALAR(landa_wnd_margin,    "LANDA_WND_MARGIN",     LANDA_WND_MARGIN_DEFAULT),
-
 
     // @Group: BARO
     // @Path: ../libraries/AP_Baro/AP_Baro.cpp

@@ -104,6 +104,7 @@ bool Plane::auto_takeoff_check(void)
         takeoff_state.last_tkoff_arm_time = 0;
         takeoff_state.start_time_ms = now;
         steer_state.locked_course_err = 0; // use current heading without any error offset
+        plane.climb_out_bearing = AP::ahrs().get_yaw();       // [rad] from North clockwise, climb out bearing, returns AP::ahrs().yaw
         return true;
     }
 

@@ -762,6 +762,8 @@ private:
 
     // Stores initial bearing when armed
     float initial_armed_bearing;
+    // Stores climb out bearing
+    float climb_out_bearing;
 
     // Camera/Antenna mount tracking and stabilisation stuff
 #if HAL_MOUNT_ENABLED

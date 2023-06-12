@@ -48,18 +48,25 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
     gspot_cmd_WPinf.content.location = gspot_loc_WP5;
     plane.mission.add_cmd(gspot_cmd_WPinf);
 
-    // Add loiter time WP4
-    AP_Mission::Mission_Command gspot_cmd_WP4;
-    gspot_cmd_WP4.id = MAV_CMD_NAV_LOITER_TIME;
-    gspot_cmd_WP4.p1 = plane.g.landa_loitertime;                              // Loiter time in [s]
-    gspot_cmd_WP4.content.location = gspot_loc_WP5;
-    plane.mission.add_cmd(gspot_cmd_WP4);
+    // Add loiter time WP5
+    AP_Mission::Mission_Command gspot_cmd_WP6;
+    gspot_cmd_WP6.id = MAV_CMD_NAV_LOITER_TURNS;
+    gspot_cmd_WP6.p1 = plane.g.landa_ltr_turns;                              // Loiter turns in [int]
+    gspot_cmd_WP6.content.location = gspot_loc_WP5;
+    plane.mission.add_cmd(gspot_cmd_WP6);
 
-    // Add RTL WP5
+    // Add loiter time WP5
     AP_Mission::Mission_Command gspot_cmd_WP5;
-    gspot_cmd_WP5.id = MAV_CMD_NAV_WAYPOINT;
+    gspot_cmd_WP5.id = MAV_CMD_NAV_LOITER_TIME;
+    gspot_cmd_WP5.p1 = plane.g.landa_ltr_time;                              // Loiter time in [s]
     gspot_cmd_WP5.content.location = gspot_loc_WP5;
     plane.mission.add_cmd(gspot_cmd_WP5);
+
+    // Add RTL WP4
+    AP_Mission::Mission_Command gspot_cmd_WP4;
+    gspot_cmd_WP4.id = MAV_CMD_NAV_WAYPOINT;
+    gspot_cmd_WP4.content.location = gspot_loc_WP5;
+    plane.mission.add_cmd(gspot_cmd_WP4);
 
     // Set bool for next waypoints (see update)
     gspot_land_mission_written = false;
@@ -126,7 +133,7 @@ void ModeAUTOLAND_G_SPOTS::update()
     ____________ START: Create land mission waypoints based on windspeed ______________
     */ 
 
-    if (nav_cmd_id == MAV_CMD_NAV_WAYPOINT && !gspot_land_mission_written)
+    if (nav_cmd_id == MAV_CMD_NAV_LOITER_TIME && !gspot_land_mission_written)
     {
         // Get wind info
         Vector3f gspot_wind                     = AP::ahrs().wind_estimate();
@@ -141,14 +148,18 @@ void ModeAUTOLAND_G_SPOTS::update()
         if (gspot_wind_head_total < gspot_land_wind_max)
         {gspot_land_flap_percent = fabs(((std::min(gspot_wind_head_total, std::max(float(0), (gspot_wind_head_total-plane.g.landa_flapminwnd)))/(gspot_land_wind_max-plane.g.landa_flapminwnd))*100)-100);} // approach direction does not matter, using abs(cos(...)) for that
         else {gspot_land_flap_percent = 0;}
-        gcs().send_text(MAV_SEVERITY_INFO, "Landing headwind vel: %f [m/s], Flap set at: %i [perc]", gspot_wind_head_total, gspot_land_flap_percent);
+        gcs().send_text(MAV_SEVERITY_INFO, "GSPOT: Landing headwind vel: %f [m/s], Flap will be set at: %i [perc]", gspot_wind_head_total, gspot_land_flap_percent);
         
         // Define approach waypoint location by distance and heading from touchdownpoint
-        const int16_t   gspot_appr_alt              = plane.g.landa_appr_alt*100;                        // [cm] WP2/approach point altidude
-        int16_t         gspot_appr_dist             = plane.g.landa_appr_dist;                           // [m] Horizontal distance of how far away the last waypoint in the air is (approach waypoint)
+        const int16_t   gspot_appr_alt              = abs(plane.g.landa_appr_alt)*100;                        // [cm] WP2/approach point altidude
+        // int8_t         landa_appr_scale        = 20;
+        int16_t         gspot_appr_dist             = std::max((abs(plane.g.landa_appr_dist)/100), abs(plane.g.landa_appr_dist) - abs(int(gspot_wind_head_total * plane.g.landa_appr_scale))); // [m] Horizontal distance of how far away the last waypoint in the air is (approach waypoint), scaled by headwind and minimum of LANDA_APPR_DIST/100
         int32_t         gspot_latitude2_t, gspot_longitude2_t;                      // [deg*1e7] Latitude and Longitude of WP2/approach point in 1e7 degree, as used in Location type
-        float           gspot_heading_runway_rad   = plane.initial_armed_bearing;   // [rad] Heading of the runway cw from true north, direction as was armed
+        // int8_t          landa_clout_enbl            = 1;
+        float           gspot_heading_runway_rad    = (plane.g.landa_clout_enbl==1)?plane.climb_out_bearing:plane.initial_armed_bearing;   // [rad] Heading of the runway cw from true north, direction as was armed or if LANDA_CLOUT_ENBL is set to 1 it will use the auto takeoff heading
         Location        gspot_loc_home{ AP::ahrs().get_home() };                    // Get home location
+        gcs().send_text(MAV_SEVERITY_INFO, "GSPOT: Approach point to land point hor. distance set at %i [m]", gspot_appr_dist);
+        
 
         // if the wind is coming from the back turn into the wind for landing
         if (fabs(gspot_wind_heading_deg_cw_from_north - degrees(plane.initial_armed_bearing)) > 90+plane.g.landa_wnd_margin)
