@@ -48,7 +48,7 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
     gspot_cmd_WPinf.content.location = gspot_loc_WP5;
     plane.mission.add_cmd(gspot_cmd_WPinf);
 
-    // Add loiter time WP5
+    // Add loiter turns WP6
     AP_Mission::Mission_Command gspot_cmd_WP6;
     gspot_cmd_WP6.id = MAV_CMD_NAV_LOITER_TURNS;
     gspot_cmd_WP6.p1 = plane.g.landa_ltr_turns;                              // Loiter turns in [int]
@@ -62,11 +62,11 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
     gspot_cmd_WP5.content.location = gspot_loc_WP5;
     plane.mission.add_cmd(gspot_cmd_WP5);
 
-    // Add RTL WP4
-    AP_Mission::Mission_Command gspot_cmd_WP4;
-    gspot_cmd_WP4.id = MAV_CMD_NAV_WAYPOINT;
-    gspot_cmd_WP4.content.location = gspot_loc_WP5;
-    plane.mission.add_cmd(gspot_cmd_WP4);
+    // // Add RTL WP4
+    // AP_Mission::Mission_Command gspot_cmd_WP4;
+    // gspot_cmd_WP4.id = MAV_CMD_NAV_WAYPOINT;
+    // gspot_cmd_WP4.content.location = gspot_loc_WP5;
+    // plane.mission.add_cmd(gspot_cmd_WP4);
 
     // Set bool for next waypoints (see update)
     gspot_land_mission_written = false;
@@ -152,10 +152,8 @@ void ModeAUTOLAND_G_SPOTS::update()
         
         // Define approach waypoint location by distance and heading from touchdownpoint
         const int16_t   gspot_appr_alt              = abs(plane.g.landa_appr_alt)*100;                        // [cm] WP2/approach point altidude
-        // int8_t         landa_appr_scale        = 20;
         int16_t         gspot_appr_dist             = std::max((abs(plane.g.landa_appr_dist)/100), abs(plane.g.landa_appr_dist) - abs(int(gspot_wind_head_total * plane.g.landa_appr_scale))); // [m] Horizontal distance of how far away the last waypoint in the air is (approach waypoint), scaled by headwind and minimum of LANDA_APPR_DIST/100
         int32_t         gspot_latitude2_t, gspot_longitude2_t;                      // [deg*1e7] Latitude and Longitude of WP2/approach point in 1e7 degree, as used in Location type
-        // int8_t          landa_clout_enbl            = 1;
         float           gspot_heading_runway_rad    = (plane.g.landa_clout_enbl==1)?plane.climb_out_bearing:plane.initial_armed_bearing;   // [rad] Heading of the runway cw from true north, direction as was armed or if LANDA_CLOUT_ENBL is set to 1 it will use the auto takeoff heading
         Location        gspot_loc_home{ AP::ahrs().get_home() };                    // Get home location
         gcs().send_text(MAV_SEVERITY_INFO, "GSPOT: Approach point to land point hor. distance set at %i [m]", gspot_appr_dist);
@@ -171,7 +169,15 @@ void ModeAUTOLAND_G_SPOTS::update()
                                     gspot_loc_home.lat, gspot_loc_home.lng, 
                                     -gspot_appr_dist, gspot_heading_runway_rad,
                                     &gspot_latitude2_t, &gspot_longitude2_t);
+        Location gspot_loc_WP4 {gspot_latitude2_t, gspot_longitude2_t, (plane.get_RTL_altitude_cm() - gspot_loc_home.alt), Location::AltFrame::ABOVE_HOME};
         Location gspot_loc_WP2 {gspot_latitude2_t, gspot_longitude2_t, gspot_appr_alt, Location::AltFrame::ABOVE_HOME};
+        Location gspot_loc_WP1 {gspot_loc_home.lat, gspot_loc_home.lng, 0, Location::AltFrame::ABOVE_HOME};
+        
+        // Add RTL WP4
+        AP_Mission::Mission_Command gspot_cmd_WP4;
+        gspot_cmd_WP4.id = MAV_CMD_NAV_WAYPOINT;
+        gspot_cmd_WP4.content.location = gspot_loc_WP4;
+        plane.mission.add_cmd(gspot_cmd_WP4);
 
         // Add loiter to alt WP3
         AP_Mission::Mission_Command gspot_cmd_WP3;
@@ -189,7 +195,8 @@ void ModeAUTOLAND_G_SPOTS::update()
         // Add landing point WP1
         AP_Mission::Mission_Command gspot_cmd_WP1;
         gspot_cmd_WP1.id = MAV_CMD_NAV_LAND;
-        gspot_cmd_WP1.content.location = gspot_loc_home;
+        gspot_cmd_WP1.p1 = (plane.get_RTL_altitude_cm() - gspot_loc_home.alt)/100; // set abort altitude to rtl altitude 
+        gspot_cmd_WP1.content.location = gspot_loc_WP1; // made new waypoint with relative altitude (instead of gspot_loc_home with total altitude) to ensure that the abort altitude is above home)
         plane.mission.add_cmd(gspot_cmd_WP1);
         // bool WP1_sent = plane.mission.add_cmd(gspot_cmd_WP1);
         // if (WP1_sent){gcs().send_text(MAV_SEVERITY_INFO, "WP1 sent succesfully!");}
