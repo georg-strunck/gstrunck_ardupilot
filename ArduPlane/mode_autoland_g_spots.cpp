@@ -154,7 +154,7 @@ void ModeAUTOLAND_G_SPOTS::update()
         const int16_t   gspot_appr_alt              = abs(plane.g.landa_appr_alt)*100;                        // [cm] WP2/approach point altidude
         int16_t         gspot_appr_dist             = std::max((abs(plane.g.landa_appr_dist)/100), abs(plane.g.landa_appr_dist) - abs(int(gspot_wind_head_total * plane.g.landa_appr_scale))); // [m] Horizontal distance of how far away the last waypoint in the air is (approach waypoint), scaled by headwind and minimum of LANDA_APPR_DIST/100
         int32_t         gspot_latitude2_t, gspot_longitude2_t;                      // [deg*1e7] Latitude and Longitude of WP2/approach point in 1e7 degree, as used in Location type
-        float           gspot_heading_runway_rad    = (plane.g.landa_clout_enbl==1)?plane.climb_out_bearing:plane.initial_armed_bearing;   // [rad] Heading of the runway cw from true north, direction as was armed or if LANDA_CLOUT_ENBL is set to 1 it will use the auto takeoff heading
+        float           gspot_heading_runway_rad    = (plane.g.landa_clout_enbl==1 && !(fabs(plane.climb_out_bearing)<=1e-9))?plane.climb_out_bearing:plane.initial_armed_bearing;   // [rad] Heading of the runway cw from true north, direction as was armed or if LANDA_CLOUT_ENBL is set to 1 it will use the auto takeoff heading
         Location        gspot_loc_home{ AP::ahrs().get_home() };                    // Get home location
         gcs().send_text(MAV_SEVERITY_INFO, "GSPOT: Approach point to land point hor. distance set at %i [m]", gspot_appr_dist);
         
