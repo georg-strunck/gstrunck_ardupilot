@@ -37,8 +37,8 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
     // Get home point (location where the plane was ARMed! (not turned on or safety switch))
     Location gspot_loc_home{AP::ahrs().get_home()};
     gcs().send_text(MAV_SEVERITY_INFO, "Home location at: %f Latitude, %f Longitude, %f Altitude", gspot_loc_home.lat * 1.0e-7, gspot_loc_home.lng * 1.0e-7, gspot_loc_home.alt * 1.0e-2);
-    const int32_t gspot_WP5_alt = plane.get_RTL_altitude_cm() - gspot_loc_home.alt;                                // [cm] WP5 altidude is equal to rtl alt (ALT_HOLD_RTL parameter)
-    Location gspot_loc_WP5{gspot_loc_home.lat, gspot_loc_home.lng, gspot_WP5_alt, Location::AltFrame::ABOVE_HOME}; // Location object WP5_alt above home, used for dummy WPinf, WP5 and WP4
+    Location gspot_loc_WP6{gspot_loc_home.lat, gspot_loc_home.lng, (plane.get_RTL_altitude_cm() - gspot_loc_home.alt), Location::AltFrame::ABOVE_HOME}; // Location object WP6_alt above home, used for dummy WPinf
+    Location gspot_loc_WP5{gspot_loc_home.lat, gspot_loc_home.lng, plane.g.landa_ltr_alt*100, Location::AltFrame::ABOVE_HOME}; // Location object WP5_alt above home, used for dummy WPinf, WP5 and WP4
 
     /*
     ________________ Mission functions found in AP_Mission.h/.cpp _______________________
@@ -50,34 +50,43 @@ bool ModeAUTOLAND_G_SPOTS::_enter()
     // Add dummy waypoint WPinf because it somehow does not take the first WP into the mission
     AP_Mission::Mission_Command gspot_cmd_WPinf;
     gspot_cmd_WPinf.id = MAV_CMD_NAV_WAYPOINT;
-    gspot_cmd_WPinf.content.location = gspot_loc_WP5;
+    gspot_cmd_WPinf.content.location = gspot_loc_WP6;
     plane.mission.add_cmd(gspot_cmd_WPinf);
 
-    // Add loiter turns WP6
+    // Add RTL WP6
     AP_Mission::Mission_Command gspot_cmd_WP6;
-    gspot_cmd_WP6.id = MAV_CMD_NAV_LOITER_TURNS;
-    // gspot_cmd_WP6.p1 = plane.g.landa_ltr_turns; // Loiter turns in [int]
-    gspot_cmd_WP6.p1 = std::min(int(255), int(plane.g.landa_ltr_turns)); // number of loiter turns
-    gspot_cmd_WP6.p1 |= (abs(plane.aparm.loiter_radius)<<8);                  // loiter radius
-    gspot_cmd_WP6.content.location = gspot_loc_WP5;
-    gspot_cmd_WP6.content.location.loiter_ccw = (plane.aparm.loiter_radius < 0); // set cw or ccw by neg/pos
-    gspot_cmd_WP6.content.location.loiter_xtrack = 0;               // 0 to xtrack from center of waypoint, 1 to xtrack from tangent exit location
+    gspot_cmd_WP6.id = MAV_CMD_NAV_WAYPOINT;
+    gspot_cmd_WP6.p1 = (0 << 8) | (0 & 0x00FF);  //(plane.g.waypoint_radius & 0x00FF);             // param 3 pass by distance in meters is held in high p1 AND param 2 is acceptance radius in meters is held in low p1
+    gspot_cmd_WP6.content.location = gspot_loc_WP6;
     plane.mission.add_cmd(gspot_cmd_WP6);
 
-    // Add loiter time WP5
+    // Add loiter to alt WP5
     AP_Mission::Mission_Command gspot_cmd_WP5;
-    gspot_cmd_WP5.id = MAV_CMD_NAV_LOITER_TIME;
-    gspot_cmd_WP5.p1 = plane.g.landa_ltr_time; // Loiter time in [s] // loiter time in seconds uses all 16 bits, 8bit seconds is too small. No room for radius.
+    gspot_cmd_WP5.id = MAV_CMD_NAV_LOITER_TO_ALT;
+    gspot_cmd_WP5.p1 = abs(plane.aparm.loiter_radius);
     gspot_cmd_WP5.content.location = gspot_loc_WP5;
     gspot_cmd_WP5.content.location.loiter_ccw = (plane.aparm.loiter_radius < 0); // set cw or ccw by neg/pos
     gspot_cmd_WP5.content.location.loiter_xtrack = 0;               // 0 to xtrack from center of waypoint, 1 to xtrack from tangent exit location
     plane.mission.add_cmd(gspot_cmd_WP5);
 
-    // // Add RTL WP4
-    // AP_Mission::Mission_Command gspot_cmd_WP4;
-    // gspot_cmd_WP4.id = MAV_CMD_NAV_WAYPOINT;
-    // gspot_cmd_WP4.content.location = gspot_loc_WP5;
-    // plane.mission.add_cmd(gspot_cmd_WP4);
+    // Add loiter turns WP6
+    AP_Mission::Mission_Command gspot_cmd_WP7;
+    gspot_cmd_WP7.id = MAV_CMD_NAV_LOITER_TURNS;
+    gspot_cmd_WP7.p1 = std::min(int(255), int(plane.g.landa_ltr_turns)); // number of loiter turns
+    gspot_cmd_WP7.p1 |= (abs(plane.aparm.loiter_radius)<<8);                  // loiter radius
+    gspot_cmd_WP7.content.location = gspot_loc_WP5;
+    gspot_cmd_WP7.content.location.loiter_ccw = (plane.aparm.loiter_radius < 0); // set cw or ccw by neg/pos
+    gspot_cmd_WP7.content.location.loiter_xtrack = 0;               // 0 to xtrack from center of waypoint, 1 to xtrack from tangent exit location
+    plane.mission.add_cmd(gspot_cmd_WP7);
+
+    // Add loiter time WP4
+    AP_Mission::Mission_Command gspot_cmd_WP4;
+    gspot_cmd_WP4.id = MAV_CMD_NAV_LOITER_TIME;
+    gspot_cmd_WP4.p1 = plane.g.landa_ltr_time; // Loiter time in [s] // loiter time in seconds uses all 16 bits, 8bit seconds is too small. No room for radius.
+    gspot_cmd_WP4.content.location = gspot_loc_WP5;
+    gspot_cmd_WP4.content.location.loiter_ccw = (plane.aparm.loiter_radius < 0); // set cw or ccw by neg/pos
+    gspot_cmd_WP4.content.location.loiter_xtrack = 0;               // 0 to xtrack from center of waypoint, 1 to xtrack from tangent exit location
+    plane.mission.add_cmd(gspot_cmd_WP4);
 
     // Set bool for next waypoints (see update)
     gspot_land_mission_written = false;
@@ -178,8 +187,10 @@ void ModeAUTOLAND_G_SPOTS::update()
 
         // Define approach waypoint location by distance and heading from touchdownpoint
         const int16_t gspot_appr_alt = abs(plane.g.landa_appr_alt) * 100;                                                                                                     // [cm] WP2/approach point altidude
-        int16_t gspot_appr_dist = std::max((abs(plane.g.landa_appr_dist) / 100), abs(plane.g.landa_appr_dist) - abs(int(gspot_wind_head_total * plane.g.landa_appr_scale)));  // [m] Horizontal distance of how far away the last waypoint in the air is (approach waypoint), scaled by headwind and minimum of LANDA_APPR_DIST/100
-        int32_t gspot_latitude2_t, gspot_longitude2_t;                                                                                                                        // [deg*1e7] Latitude and Longitude of WP2/approach point in 1e7 degree, as used in Location type
+        int16_t gspot_appr_dist = std::max((abs(plane.g.landa_appr_dist) / 10), abs(plane.g.landa_appr_dist) - abs(int(gspot_wind_head_total * plane.g.landa_appr_scale)));  // [m] Horizontal distance of how far away the last waypoint in the air is (approach waypoint), scaled by headwind and minimum of LANDA_APPR_DIST/100
+        // int16_t gspot_preappr_dist = gspot_appr_dist * 1.1; // Pre-approach distance 
+        int32_t gspot_latitude2_t, gspot_longitude2_t; 
+        // int32_t gspot_latitude3_t, gspot_longitude3_t;                                                                                                                        // [deg*1e7] Latitude and Longitude of WP2/approach point in 1e7 degree, as used in Location type
         float gspot_heading_runway_rad = (plane.g.landa_clout_enbl == 1 && !(fabs(plane.climb_out_bearing) <= 1e-9)) ? plane.climb_out_bearing : plane.initial_armed_bearing; // [rad] Heading of the runway cw from true north, direction as was armed or if LANDA_CLOUT_ENBL is set to 1 it will use the auto takeoff heading
         Location gspot_loc_home{AP::ahrs().get_home()};                                                                                                                       // Get home location
         gcs().send_text(MAV_SEVERITY_INFO, "GSPOT: Approach point to land point hor. distance set at %i [m]", gspot_appr_dist);
@@ -188,44 +199,50 @@ void ModeAUTOLAND_G_SPOTS::update()
         if (fabs(gspot_wind_heading_deg_cw_from_north - degrees(plane.initial_armed_bearing)) > 90 + plane.g.landa_wnd_margin)
         {
             gspot_appr_dist = -gspot_appr_dist;
+            // gspot_preappr_dist = -gspot_preappr_dist;
         }
 
+        // // Calculate pre-approach waypoint3 latitude and longitude
+        // ModeAUTOLAND_G_SPOTS::gspot_calc_lat_from_latlngdistheading(
+        //                             gspot_loc_home.lat, gspot_loc_home.lng,
+        //                             -gspot_preappr_dist, gspot_heading_runway_rad,
+        //                             &gspot_latitude3_t, &gspot_longitude3_t);
         // Calculate approach waypoint latitude and longitude
         ModeAUTOLAND_G_SPOTS::gspot_calc_lat_from_latlngdistheading(
-            gspot_loc_home.lat, gspot_loc_home.lng,
-            -gspot_appr_dist, gspot_heading_runway_rad,
-            &gspot_latitude2_t, &gspot_longitude2_t);
-        Location gspot_loc_WP4{gspot_latitude2_t, gspot_longitude2_t, (plane.get_RTL_altitude_cm() - gspot_loc_home.alt), Location::AltFrame::ABOVE_HOME};
+                                    gspot_loc_home.lat, gspot_loc_home.lng,
+                                    -gspot_appr_dist, gspot_heading_runway_rad,
+                                    &gspot_latitude2_t, &gspot_longitude2_t);
+        Location gspot_loc_WP3{gspot_latitude2_t, gspot_longitude2_t, plane.g.landa_ltr_alt*100, Location::AltFrame::ABOVE_HOME};
         Location gspot_loc_WP2{gspot_latitude2_t, gspot_longitude2_t, gspot_appr_alt, Location::AltFrame::ABOVE_HOME};
         Location gspot_loc_WP1{gspot_loc_home.lat, gspot_loc_home.lng, 0, Location::AltFrame::ABOVE_HOME};
 
-        // Add RTL WP4
-        AP_Mission::Mission_Command gspot_cmd_WP4;
-        gspot_cmd_WP4.id = MAV_CMD_NAV_WAYPOINT;
-        gspot_cmd_WP4.p1 = (0 << 8) | (plane.g.waypoint_radius & 0x00FF);             // param 3 pass by distance in meters is held in high p1 AND param 2 is acceptance radius in meters is held in low p1
-        gspot_cmd_WP4.content.location = gspot_loc_WP4;
-        plane.mission.add_cmd(gspot_cmd_WP4);
-
-        // Add loiter to alt WP3
+        // Add pre approach WP3 1/10th further out to allow turn before flap deployment and landa_home_alt to fly down
         AP_Mission::Mission_Command gspot_cmd_WP3;
-        gspot_cmd_WP3.id = MAV_CMD_NAV_LOITER_TO_ALT;
-        gspot_cmd_WP3.p1 = abs(plane.aparm.loiter_radius);
-        gspot_cmd_WP3.content.location = gspot_loc_WP2;
-        gspot_cmd_WP3.content.location.loiter_ccw = (plane.aparm.loiter_radius < 0); // set cw or ccw by neg/pos
-        gspot_cmd_WP3.content.location.loiter_xtrack = 0;               // 0 to xtrack from center of waypoint, 1 to xtrack from tangent exit location
+        gspot_cmd_WP3.id = MAV_CMD_NAV_WAYPOINT;
+        gspot_cmd_WP3.p1 = (0 << 8) | (0 & 0x00FF);//(plane.g.waypoint_radius & 0x00FF);             // param 3 pass by distance in meters is held in high p1 AND param 2 is acceptance radius in meters is held in low p1
+        gspot_cmd_WP3.content.location = gspot_loc_WP3;
         plane.mission.add_cmd(gspot_cmd_WP3);
+
+        // Add loiter to alt WP5
+        AP_Mission::Mission_Command gspot_cmd_WP2b;
+        gspot_cmd_WP2b.id = MAV_CMD_NAV_LOITER_TO_ALT;
+        gspot_cmd_WP2b.p1 = abs(plane.aparm.loiter_radius);
+        gspot_cmd_WP2b.content.location = gspot_loc_WP2;
+        gspot_cmd_WP2b.content.location.loiter_ccw = (plane.aparm.loiter_radius < 0); // set cw or ccw by neg/pos
+        gspot_cmd_WP2b.content.location.loiter_xtrack = 0;               // 0 to xtrack from center of waypoint, 1 to xtrack from tangent exit location
+        plane.mission.add_cmd(gspot_cmd_WP2b);
 
         // Add final approach waypoint WP2
         AP_Mission::Mission_Command gspot_cmd_WP2;
         gspot_cmd_WP2.id = MAV_CMD_NAV_WAYPOINT;
-        gspot_cmd_WP2.p1 = (0 << 8) | (plane.g.waypoint_radius & 0x00FF);             // param 3 pass by distance in meters is held in high p1 AND param 2 is acceptance radius in meters is held in low p1
+        gspot_cmd_WP2.p1 = (0 << 8) | (0 & 0x00FF);//(plane.g.waypoint_radius & 0x00FF);             // param 3 pass by distance in meters is held in high p1 AND param 2 is acceptance radius in meters is held in low p1
         gspot_cmd_WP2.content.location = gspot_loc_WP2;
         plane.mission.add_cmd(gspot_cmd_WP2);
 
         // Add landing point WP1
         AP_Mission::Mission_Command gspot_cmd_WP1;
         gspot_cmd_WP1.id = MAV_CMD_NAV_LAND;
-        gspot_cmd_WP1.p1 = (plane.get_RTL_altitude_cm() - gspot_loc_home.alt) / 100; // set abort altitude to rtl altitude
+        gspot_cmd_WP1.p1 = plane.g.landa_ltr_alt; // set abort altitude to rtl altitude
         gspot_cmd_WP1.content.location = gspot_loc_WP1;                              // made new waypoint with relative altitude (instead of gspot_loc_home with total altitude) to ensure that the abort altitude is above home)
         plane.mission.add_cmd(gspot_cmd_WP1);
         // bool WP1_sent = plane.mission.add_cmd(gspot_cmd_WP1);

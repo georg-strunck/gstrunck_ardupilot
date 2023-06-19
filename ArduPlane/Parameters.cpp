@@ -786,6 +786,14 @@ const AP_Param::Info Plane::var_info[] = {
     // @User: Advanced
     GSCALAR(landa_flapminwnd,    "LANDA_FLAPMINWND",     LANDA_FLAPMINWND_DEFAULT),
 
+    // @Param: LANDA_LTR_ALT
+    // @DisplayName: Autoland RTL Loiter Altitude
+    // @Description: Altitude in [m] to which to loiter above home to collect wind estimate.
+    // @Range: 0 200
+    // @Increment: 1
+    // @User: Advanced
+    GSCALAR(landa_ltr_alt,    "LANDA_LTR_ALT",     LANDA_LTR_ALT_DEFAULT),
+
     // @Param: LANDA_LTR_TIME
     // @DisplayName: Autoland RTL Loiter time
     // @Description: Time in [s] to loiter at RTL altitude above home after LANDA_LTR_TURNS is completed. The land approach waypoints will be set during this phase.

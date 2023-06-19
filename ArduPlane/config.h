@@ -307,6 +307,10 @@
 #ifndef LANDA_FLAPMINWND_DEFAULT
  #define LANDA_FLAPMINWND_DEFAULT 5
 #endif
+//  Autoland RTL Loiter altitude
+#ifndef LANDA_LTR_ALT_DEFAULT
+ #define LANDA_LTR_ALT_DEFAULT 70
+#endif
 //  Autoland RTL Loiter time
 #ifndef LANDA_LTR_TIME_DEFAULT
  #define LANDA_LTR_TIME_DEFAULT 5
