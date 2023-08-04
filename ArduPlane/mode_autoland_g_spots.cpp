@@ -6,6 +6,7 @@
 bool ModeAUTOLAND_G_SPOTS::_enter()
 {
     gcs().send_text(MAV_SEVERITY_INFO, "GSPOT: ENTERed GSPOTs mode");
+    gcs().send_text(MAV_SEVERITY_INFO, "GSPOT: Arm direction: %f [deg] from north cw", degrees(plane.initial_armed_bearing));
 #if HAL_QUADPLANE_ENABLED
     // check if we should refuse auto mode due to a missing takeoff in
     // guided_wait_takeoff state
@@ -170,10 +171,21 @@ void ModeAUTOLAND_G_SPOTS::update()
         {
             gspot_wind_heading_deg_cw_from_north = 360 + gspot_wind_heading_deg_cw_from_north;
         }
-        gcs().send_text(MAV_SEVERITY_INFO, "Wind speed: %f [m/s]; Wind direction: %f [deg] from north cw", gspot_wind_vel_total_mps, gspot_wind_heading_deg_cw_from_north);
+        gcs().send_text(MAV_SEVERITY_INFO, "GSPOT: Wind speed: %f [m/s]; Wind direction: %f [deg] from north cw", gspot_wind_vel_total_mps, gspot_wind_heading_deg_cw_from_north);
+
+        // Get runway info
+        float gspot_heading_runway_deg = degrees((plane.g.landa_clout_enbl == 1 && !(fabs(plane.climb_out_bearing) <= 1e-9)) ? plane.climb_out_bearing : plane.initial_armed_bearing); // [rad] Heading of the runway cw from true north, direction as was armed or if LANDA_CLOUT_ENBL is set to 1 it will use the auto takeoff heading
+        if (gspot_heading_runway_deg < 0.)
+        {
+            gspot_heading_runway_deg = 360 + gspot_heading_runway_deg;
+        }
+        gcs().send_text(MAV_SEVERITY_INFO, "GSPOT: Runway direction: %f [deg] from north cw", gspot_heading_runway_deg);
+        gcs().send_text(MAV_SEVERITY_INFO, "GSPOT: init arm bearing %f [rad]", plane.initial_armed_bearing);
+        gcs().send_text(MAV_SEVERITY_INFO, "GSPOT: gspot_heading_runway %f [rad]", radians(gspot_heading_runway_deg));
+
 
         // Set land flap percentage
-        float gspot_wind_head_total = fabs(cos(radians(fabs(gspot_wind_heading_deg_cw_from_north - degrees(plane.initial_armed_bearing))))) * gspot_wind_vel_total_mps;
+        float gspot_wind_head_total = fabs(cos(radians(fabs(gspot_wind_heading_deg_cw_from_north - gspot_heading_runway_deg)))) * gspot_wind_vel_total_mps;
         float gspot_land_wind_max = plane.g.landa_flapmaxwnd;
         if (gspot_wind_head_total < gspot_land_wind_max)
         {
@@ -191,12 +203,11 @@ void ModeAUTOLAND_G_SPOTS::update()
         // int16_t gspot_preappr_dist = gspot_appr_dist * 1.1; // Pre-approach distance 
         int32_t gspot_latitude2_t, gspot_longitude2_t; 
         // int32_t gspot_latitude3_t, gspot_longitude3_t;                                                                                                                        // [deg*1e7] Latitude and Longitude of WP2/approach point in 1e7 degree, as used in Location type
-        float gspot_heading_runway_rad = (plane.g.landa_clout_enbl == 1 && !(fabs(plane.climb_out_bearing) <= 1e-9)) ? plane.climb_out_bearing : plane.initial_armed_bearing; // [rad] Heading of the runway cw from true north, direction as was armed or if LANDA_CLOUT_ENBL is set to 1 it will use the auto takeoff heading
         Location gspot_loc_home{AP::ahrs().get_home()};                                                                                                                       // Get home location
         gcs().send_text(MAV_SEVERITY_INFO, "GSPOT: Approach point to land point hor. distance set at %i [m]", gspot_appr_dist);
 
         // if the wind is coming from the back turn into the wind for landing
-        if (fabs(gspot_wind_heading_deg_cw_from_north - degrees(plane.initial_armed_bearing)) > 90 + plane.g.landa_wnd_margin)
+        if (fabs(gspot_wind_heading_deg_cw_from_north - gspot_heading_runway_deg) > 90 + plane.g.landa_wnd_margin)
         {
             gspot_appr_dist = -gspot_appr_dist;
             // gspot_preappr_dist = -gspot_preappr_dist;
@@ -210,7 +221,7 @@ void ModeAUTOLAND_G_SPOTS::update()
         // Calculate approach waypoint latitude and longitude
         ModeAUTOLAND_G_SPOTS::gspot_calc_lat_from_latlngdistheading(
                                     gspot_loc_home.lat, gspot_loc_home.lng,
-                                    -gspot_appr_dist, gspot_heading_runway_rad,
+                                    -gspot_appr_dist, radians(gspot_heading_runway_deg),
                                     &gspot_latitude2_t, &gspot_longitude2_t);
         Location gspot_loc_WP3{gspot_latitude2_t, gspot_longitude2_t, plane.g.landa_ltr_alt*100, Location::AltFrame::ABOVE_HOME};
         Location gspot_loc_WP2{gspot_latitude2_t, gspot_longitude2_t, gspot_appr_alt, Location::AltFrame::ABOVE_HOME};
